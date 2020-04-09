@@ -1,0 +1,78 @@
+{
+    "parameters" :
+    {
+        "pop"         : 1000, 
+        "pct_ill"     : 0.1,
+        "begin_dte"   : "2010-01-01",
+        "end_dte"     : "2018-12-31",
+        "ref_year"    : 2015,
+        "pct_men"     : 0.54,
+        "geo_level"   : "dep",
+        "geo_sel"     : "29",
+        "age_mean_m"  : 71,
+        "age_sd_m"    : 10,
+        "age_mean_w"  : 75,
+        "age_sd_w"    : 13,
+        "pct_death_m_pop" : 0.12,
+        "pct_death_w_pop" : 0.1,
+        "form_res"    : "LIN"
+    },
+    "init" : 
+    {
+        "mark" : "AVC",
+        "age_mean_m"  : 65,
+        "age_sd_m"    : 8,
+        "age_mean_w"  : 70,
+        "age_sd_w"    : 8,
+        "pct_death_m" : 0.25,
+        "delay_death_m" : 3,
+        "pct_death_w" : 0.2,
+        "delay_death_w" : 3
+    },
+
+    "events" : 
+    [
+        {
+            "mark" : "cancer",
+            "occ" : -1,
+            "pct_occ" : 0.06,
+            "delay_mean" : 365,
+            "delay_sd" : 250,
+            "nb_occ" : 1,
+            "nb_occ_max" : 3,
+            "pct_occ_pop" : 0.03
+        },
+        {
+            "mark" : "diab",
+            "occ" : -1,
+            "pct_occ" : 0.18,
+            "delay_mean" : 365,
+            "delay_sd" : 300,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0.10
+        },
+        
+        {
+            "mark" : "hta",
+            "occ" : -1,
+            "pct_occ" : 0.67,
+            "delay_mean" : 365,
+            "delay_sd" : 150,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0.3
+        },
+        {
+            "mark" : "complication1",
+            "occ" : 1,
+            "pct_occ" : 0.25,
+            "delay_mean" : 90,
+            "delay_sd" : 30,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0.05
+        }        
+    ]
+
+}
