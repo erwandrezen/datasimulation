@@ -1,0 +1,88 @@
+{    
+    "parameters" :
+    {
+        "pct_err"     : 0.1,
+        "init_file" : "F:/PEPS/Simulated Data/files/file_init.csv",
+        "rep_err" : "F:/PEPS/Simulated Data/files/errors/"
+    },
+
+    "scenarios" : 
+    [  
+       
+       {
+           "scenario": "yob_null",
+           "nb_files"      : 1,
+           "evt" : [
+                 {
+                    "err"     : "yob",
+                    "typ_err" : "null",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        }, 
+        {
+           "scenario": "yob_val",
+           "nb_files"      : 1,
+           "evt" : [
+                 {
+                    "err"     : "yob",
+                    "typ_err" : "",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        },        
+
+       {
+           "scenario": "mob_val",
+           "nb_files"      : 3,
+           "evt" : [
+                 {
+                    "err"     : "mob",
+                    "typ_err" : "",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        },
+       {
+           "scenario": "death_dte",
+           "nb_files"      : 2,
+           "evt" : [
+                {
+                    "err"     : "death",
+                    "typ_err" : "date",
+                    "pct_err" : 1,
+                    "err_sd"  : 1
+                }
+            ]
+        },
+       {
+           "scenario": "death_null",
+           "nb_files"      : 3,
+           "evt" : [
+                {
+                    "err"     : "death",
+                    "typ_err" : "null",
+                    "pct_err" : 1,
+                    "err_sd"  : 2
+                }
+            ]
+        },
+       {
+           "scenario": "mark_dte",
+           "nb_files"      : 5,
+           "evt" : [
+                {
+                    "err"     : "mark",
+                    "typ_err" : "date",
+                    "pct_err" : 1,
+                    "err_sd"  : 2
+                }
+            ]
+        }                
+        
+    ]
+
+}
