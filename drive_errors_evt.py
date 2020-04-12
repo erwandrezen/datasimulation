@@ -38,7 +38,8 @@ for s, scen in enumerate(l_scenarios):
         err=0
         for e,evt in enumerate(l_scenarios[s]["evt"]):
             l_evt=random.sample(range(0,len(df_file)),nb_err)
-            l_init_sel=random.sample(range(0,len(l_init)),nb_err)
+            #l_init_sel=random.sample(range(0,len(l_init)),nb_err)
+            l_init_sel=random.sample(l_init,nb_err)
             err=err+int(nb_err*evt['pct_err'])
             for p in range(err):
                 if evt['err']=='yob':
@@ -74,6 +75,8 @@ for s, scen in enumerate(l_scenarios):
                         df_err['mark_ts'][l_evt[p]]=(pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
                     if evt['typ_err']=='add': 
                         df_err=pd.DataFrame(df_init[df_init.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
+                    if evt['typ_err']=='del': 
+                        df_err=df_err.drop([l_init_sel[p]])
 
                         
 
