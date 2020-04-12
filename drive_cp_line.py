@@ -4,6 +4,7 @@ import pandas as pd
 import json
 import datetime
 import random
+import sys
 #import numpy.random as rd
 from scipy.stats import truncnorm
 
@@ -41,7 +42,7 @@ def gen_com():
 
   
 def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
-
+    l_evt_dte=[]
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
         if occ==1:
@@ -95,9 +96,10 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     # tirage au sort de la date de dc
     if death==1:
         # generation de la liste des dates de dc possibles 
-        end_dte=min(init_dte+datetime.timedelta(days=delay_death),fin)
-        l_death_dte = pd.date_range(init_dte, end_dte).tolist()
+        end1_dte=min(init_dte+datetime.timedelta(days=delay_death),fin)
+        l_death_dte = pd.date_range(init_dte, end1_dte).tolist()
         death_dte = random.choice(l_death_dte)
+        end_dte=min(end1_dte,death_dte)
     else:
         death_dte=None
         end_dte=fin
@@ -166,8 +168,17 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
 # debut programme
 # ################################################################################
 
+if len(sys.argv)<1:
+    print ("You must provide :")
+    print ("   1) [IN]  a json parameter file")
+    sys.exit();
+
+if len(sys.argv)==0:
+    file_param   = sys.argv[1]
+else:
+    file_param='param_cp.json'
 # lecture du fichiers des parametres generaux
-f_param = json.load(open("param_cp.json"))
+f_param = json.load(open(file_param))
 param=f_param['parameters']
 l_init=f_param['init']
 l_event=f_param['events']
