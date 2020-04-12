@@ -4,9 +4,38 @@ import pandas as pd
 import json
 import datetime
 import random
-#import numpy.random as rd
+import sys
+import os
+import shutil
+
+import numpy as np
 from scipy.stats import truncnorm
 
+#################################################################################
+# progress bar (https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console)
+#################################################################################
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+        
 # ################################################################################
 # fonctions
 # ################################################################################
@@ -166,12 +195,41 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
 # debut programme
 # ################################################################################
 
-# lecture du fichiers des parametres generaux
-f_param = json.load(open("param_cp.json"))
-param=f_param['parameters']
-l_init=f_param['init']
-l_event=f_param['events']
+if len(sys.argv) < 2:
+    print ("you must provide the following arguments:")
+    print ("  1) configuration file");
+    sys.exit(1);
 
+param_cp = sys.argv[1];
+
+# lecture du fichiers des parametres generaux
+f_param = json.load(open(param_cp))
+
+param   = f_param['parameters']
+l_init  = f_param['init']
+l_event = f_param['events']
+
+# if no output directory is defined, we create one in the current folder
+if not "rep_file" in param: 
+    outputDir = "run_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    print ("no 'ref_file' defined -> creating directory", outputDir);
+    os.mkdir (outputDir); 
+    param["rep_file"] = outputDir + "/"
+
+if not param["rep_file"].endswith("/"):  param["rep_file"] += "/"
+
+# we also copy the configuration file in the output directory
+shutil.copy(param_cp, param["rep_file"] + os.path.basename(param_cp));
+
+file_all     = param.get("file_all",     "file_all.csv")
+file_init    = param.get("file_init",    "file_init.csv")
+file_healthy = param.get("file_healthy", "file_healthy.csv")
+
+# we initialize the random generator by a seed (if any provided by the user)
+# by default, a 0 seed is used which ensures that the outputs are the same for the same config.
+seed = param.get("seed", "0")
+random.seed (int(seed));
+np.random.seed (int(seed));
 
 # recuperation des parametres demographique
 nb_men_init=int(param['pop']*param['pct_men']*param['pct_ill'])
@@ -250,12 +308,15 @@ for i in range(nb_men_init):
        
     del y_n_death[0]
 
+    printProgressBar(i, nb_men_init-1, prefix="men   (ill)", length=50)
+
 
 # generation de la population des femmes malades 
 l_women_init=[]
 y_n_death = [0]*(nb_women_init-int(l_init['pct_death_w']*nb_women_init)) + [1]*int(l_init['pct_death_w']*nb_women_init)
 random.shuffle(y_n_death)
-for j in range(nb_men_init,int(param['pop']*param['pct_ill'])):
+[i0,i1] = [nb_men_init,int(param['pop']*param['pct_ill'])]
+for j in range(i0,i1):
     new_pat_init=gen_new_pat_init(j+1,2,l_init['age_mean_w'],l_init['age_sd_w'],param['ref_year'],delay_death_m)
 
     for e,evt in enumerate(new_pat_init):
@@ -263,11 +324,14 @@ for j in range(nb_men_init,int(param['pop']*param['pct_ill'])):
 
     del y_n_death[0]
     
+    printProgressBar(j-i0, i1-i0-1, prefix="women (ill)", length=50)
+
 # generation de la population des hommes sans la maladie initiale
 l_men=[]
 y_n_death = [0]*(nb_men-int(param['pct_death_m_pop']*nb_men)) + [1]*int(param['pct_death_m_pop']*nb_men)
 random.shuffle(y_n_death)
-for k in range(nb_women_init+nb_men_init,nb_men+int(param['pop']*param['pct_ill'])):
+[i0,i1] = [nb_women_init+nb_men_init, nb_men+int(param['pop']*param['pct_ill'])]
+for k in range(i0,i1):
     new_pat=gen_new_pat(k+1,1,int(param['age_mean_m']),int(param['age_sd_m']),param['ref_year'])
 
     for e,evt in enumerate(new_pat):  
@@ -275,11 +339,14 @@ for k in range(nb_women_init+nb_men_init,nb_men+int(param['pop']*param['pct_ill'
         
     del y_n_death[0]
 
+    printProgressBar(k-i0, i1-i0-1, prefix="men        ", length=50)
+
 # generation de la population des femmes sans la maladie initiale 
 l_women=[]
 y_n_death = [0]*(nb_women-int(param['pct_death_w_pop']*nb_women)) + [1]*int(param['pct_death_w_pop']*nb_women)
 random.shuffle(y_n_death)
-for l in range(nb_women_init+nb_men_init+nb_men,param['pop']):
+[i0,i1] = [nb_women_init+nb_men_init+nb_men, param['pop']]
+for l in range(i0,i1):
     new_pat=gen_new_pat(l+1,2,param['age_mean_w'],param['age_sd_w'],param['ref_year'])
         
     for e,evt in enumerate(new_pat): 
@@ -287,6 +354,7 @@ for l in range(nb_women_init+nb_men_init+nb_men,param['pop']):
         
     del y_n_death[0]
 
+    printProgressBar(l-i0, i1-i0-1, prefix="women      ", length=50)
 
 
 # preparation export csv, selon format
@@ -345,15 +413,10 @@ df_healthy["mark_ts"] = (pd.to_datetime(df_healthy["mark_dte"], format="%Y-%m-%d
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
 
 
-
-
-
 # export de la population dans un fichier csv
-df_all.to_csv(param["rep_file"]+'file_all.csv',index=False,sep=';')
-
-df_init.to_csv(param["rep_file"]+'file_init.csv',index=False,sep=';')
-
-df_healthy.to_csv(param["rep_file"]+'file_healthy.csv',index=False,sep=';')
+df_all.    to_csv (param["rep_file"]+ file_all,     index=False, sep=';')
+df_init.   to_csv (param["rep_file"]+ file_init ,   index=False, sep=';')
+df_healthy.to_csv (param["rep_file"]+ file_healthy, index=False, sep=';')
 
 
 
