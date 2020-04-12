@@ -15,7 +15,7 @@ def gen_yob (age_mean,age_sd,ref_year):
      # attribution aleatoire de l'annee de naissance selon la fourchette des parametres
     #yob=ref_year-(random.randint(age_mean-age_sd,age_mean+age_sd))
     # yob=ref_year-int((random.gauss(age_mean, age_sd)))
-    y=truncnorm((30 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd)
+    y=truncnorm((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd)
     year=y.rvs()
     yob=ref_year-int(year)
     
@@ -40,13 +40,13 @@ def gen_com():
 
 
   
-def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark):
+def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
 
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
         if occ==1:
-            end_dte=min(init_dte+datetime.timedelta(days=delay_mean),fin)
-            l_evt_dte = pd.date_range(init_dte, end_dte).tolist()
+            end_dte2=min(init_dte+datetime.timedelta(days=delay_mean),end_dte)
+            l_evt_dte = pd.date_range(init_dte, end_dte2).tolist()
         else:
             begin_dte=max(init_dte-datetime.timedelta(days=delay_mean),deb)
             l_evt_dte = pd.date_range(begin_dte,init_dte).tolist()
@@ -62,11 +62,11 @@ def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark):
 
 
  
-def gen_events_lin (yn_occ,mark):
+def gen_events_lin (yn_occ,mark,end_dte):
 
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
-        l_evt_dte = pd.date_range(deb, fin).tolist()                     
+        l_evt_dte = pd.date_range(deb, end_dte).tolist()                     
         evt_dte = random.choice(l_evt_dte)
     else:
         evt_dte=None
@@ -79,7 +79,7 @@ def gen_events_lin (yn_occ,mark):
 
 
     
-# generation d'un nouveau patient 
+# generation d'un nouveau patient malade
 def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     
     # tirage au sort l'annee de naissance
@@ -90,7 +90,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     com=gen_com()    
     # tirage au sort de la date de l'event initial
     init_dte = random.choice(l_date)
-    # Date de deces
+    # Date de deces oui/non
     death=y_n_death[0]
     # tirage au sort de la date de dc
     if death==1:
@@ -100,9 +100,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
         death_dte = random.choice(l_death_dte)
     else:
         death_dte=None
-
-    #pat=[num_pat,sex,yob,mob,com,init_dte,death,death_dte]
-    #new_pat=[num_pat,sex,yob,mob,com,init_dte,death,death_dte]
+        end_dte=fin
     
     # generation des events
     evt_pat=[]
@@ -110,7 +108,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     for e, evt in enumerate(l_event):
         if l_y_n_init[e][0]==1:
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
-                new_evt=gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][0],evt['delay_mean'],evt['mark'])
+                new_evt=gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][0],evt['delay_mean'],evt['mark'],end_dte)
                 new_pat= [num_pat,sex,yob,mob,com,init_dte,death,death_dte]+new_evt
                 evt_pat.append(new_pat)
             
@@ -121,7 +119,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     return evt_pat
 
 
-# generation d'un nouveau patient 
+# generation d'un nouveau patient non malade
 def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
     
     # tirage au sort l'annee de naissance
@@ -141,11 +139,10 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
         # generation de la liste des dates de dc possibles 
         l_death_dte = pd.date_range(deb, fin).tolist()
         death_dte = random.choice(l_death_dte)
+        end_dte=death_dte
     else:
         death_dte=None
-
-   # pat=[num_pat,sex,yob,mob,com,init_dte,death,death_dte]
-   # new_pat=[num_pat,sex,yob,mob,com,init_dte,death,death_dte]
+        end_dte=fin
     
     # generation des events
     evt_pat=[]
@@ -153,7 +150,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
     for e,evt in enumerate(l_event):
         if l_y_n[e][0]==1:
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
-                new_evt=gen_events_lin(l_y_n[e][0],evt['mark'])
+                new_evt=gen_events_lin(l_y_n[e][0],evt['mark'],end_dte)
                 new_pat= [num_pat,sex,yob,mob,com,init_dte,death,death_dte]+new_evt
                 evt_pat.append(new_pat) 
         
@@ -236,7 +233,6 @@ for e in l_event:
 # ################################################################################
 # generation fichier patients
 # ################################################################################
-
 
 
 # generation de la population des hommes malades
@@ -353,13 +349,11 @@ df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["
 
 
 # export de la population dans un fichier csv
-df_all.to_csv('files/file_all.csv',index=False,sep=';')
+df_all.to_csv(param["rep_file"]+'file_all.csv',index=False,sep=';')
 
-df_init.to_csv('files/file_init.csv',index=False,sep=';')
+df_init.to_csv(param["rep_file"]+'file_init.csv',index=False,sep=';')
 
-df_healthy.to_csv('files/file_healthy.csv',index=False,sep=';')
-
-
+df_healthy.to_csv(param["rep_file"]+'file_healthy.csv',index=False,sep=';')
 
 
 

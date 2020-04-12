@@ -14,11 +14,16 @@ l_param=f_errors['parameters']
 pct_err=l_param["pct_err"]
 init_file=l_param["init_file"]
 
-df_init=pd.read_csv(init_file, sep=';')
+df_file=pd.read_csv(init_file, sep=';')
 
 
+df_init=df_file[(df_file['mark']==l_param['init'])]
+df_init['mark_dte']=pd.to_datetime(df_init['mark_dte'])+datetime.timedelta(days=1)
+df_init['mark_ts']=df_init['mark_ts']+1
+                            
+l_init=df_init.index.values.tolist()
 # nb erreurs calcule selon le nb d'evt
-nb_err=int(pct_err*len(df_init))
+nb_err=int(pct_err*len(df_file))
 
 # fixer la série "aleatoire" ?
 #random.seed(?)
@@ -26,15 +31,14 @@ nb_err=int(pct_err*len(df_init))
 for s, scen in enumerate(l_scenarios):
     
     nb_files=l_scenarios[s]["nb_files"]
-    print(nb_files)
     l_events=l_scenarios[s]["evt"]
     for f in range(nb_files):
         file_name=l_scenarios[s]["scenario"]+"_n"+str(f)+".csv"
-        df_err=df_init.copy()
-        print(file_name)
+        df_err=df_file.copy()
         err=0
         for e,evt in enumerate(l_scenarios[s]["evt"]):
-            l_evt=random.sample(range(0,len(df_init)),nb_err)
+            l_evt=random.sample(range(0,len(df_file)),nb_err)
+            l_init_sel=random.sample(range(0,len(l_init)),nb_err)
             err=err+int(nb_err*evt['pct_err'])
             for p in range(err):
                 if evt['err']=='yob':
@@ -68,6 +72,9 @@ for s, scen in enumerate(l_scenarios):
                     if evt['typ_err']=='date':   
                         df_err['mark_dte'][l_evt[p]]=pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
                         df_err['mark_ts'][l_evt[p]]=(pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
+                    if evt['typ_err']=='add': 
+                        df_err=pd.DataFrame(df_init[df_init.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
+
                         
 
         df_err.to_csv(l_param["rep_err"]+file_name,index=False,sep=';')                

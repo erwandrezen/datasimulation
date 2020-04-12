@@ -2,6 +2,7 @@
     "parameters" :
     {
         "pct_err"     : 0.1,
+        "init" : "AVC",
         "init_file" : "F:/PEPS/Simulated Data/files/file_init.csv",
         "rep_err" : "F:/PEPS/Simulated Data/files/errors/"
     },
@@ -72,7 +73,7 @@
         },
        {
            "scenario": "mark_dte",
-           "nb_files"      : 5,
+           "nb_files"      : 2,
            "evt" : [
                 {
                     "err"     : "mark",
@@ -81,8 +82,19 @@
                     "err_sd"  : 2
                 }
             ]
-        }                
-        
+        },
+       {
+           "scenario": "mark_add",
+           "nb_files"      : 1,
+           "evt" : [
+                {
+                    "err"     : "mark",
+                    "typ_err" : "add",
+                    "pct_err" : 1,
+                    "err_sd"  : 2
+                }
+            ]
+        }               
     ]
 
 }
