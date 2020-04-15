@@ -18,15 +18,15 @@ df_file=pd.read_csv(init_file, sep=';')
 
 
 df_init=df_file[(df_file['mark']==l_param['init'])]
-df_init['mark_dte']=pd.to_datetime(df_init['mark_dte'])+datetime.timedelta(days=1)
-df_init['mark_ts']=df_init['mark_ts']+1
                             
 l_init=df_init.index.values.tolist()
 # nb erreurs calcule selon le nb d'evt
 nb_err=int(pct_err*len(df_file))
 
+
 # fixer la série "aleatoire" ?
 #random.seed(?)
+
 
 for s, scen in enumerate(l_scenarios):
     
@@ -74,7 +74,10 @@ for s, scen in enumerate(l_scenarios):
                         df_err['mark_dte'][l_evt[p]]=pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
                         df_err['mark_ts'][l_evt[p]]=(pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
                     if evt['typ_err']=='add': 
-                        df_err=pd.DataFrame(df_init[df_init.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
+                        df_add=df_init.copy()
+                        df_add['mark_dte']=pd.to_datetime(df_add['mark_dte'])+datetime.timedelta(days=evt['err_sd'])
+                        df_add['mark_ts']=df_add['mark_ts']+evt['err_sd']
+                        df_err=pd.DataFrame(df_add[df_add.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
                     if evt['typ_err']=='del': 
                         df_err=df_err.drop([l_init_sel[p]])
 
