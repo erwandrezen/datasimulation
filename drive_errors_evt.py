@@ -65,14 +65,14 @@ for s, scen in enumerate(l_scenarios):
                             df_err.loc[df_err['num_pat']==numpat,'death_ts']=47483
                         else:
                             df_err.loc[df_err['num_pat']==numpat,'death_dte']=pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
-                            df_err.loc[df_err['num_pat']==numpat,'death_ts']=(pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days                            
+                            df_err.loc[df_err['num_pat']==numpat,'death_ts']=df_err['death_ts'][l_evt[p]]+evt['err_sd']                          
                 if evt['err']=='mark':
                     if evt['typ_err']=='null':
                         df_err['mark_dte'][l_evt[p]]=None  
                         df_err['mark_ts'][l_evt[p]]=None  
                     if evt['typ_err']=='date':   
                         df_err['mark_dte'][l_evt[p]]=pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
-                        df_err['mark_ts'][l_evt[p]]=(pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
+                        df_err['mark_ts'][l_evt[p]]=df_err['mark_ts'][l_evt[p]]+evt['err_sd']
                     if evt['typ_err']=='add': 
                         df_add=df_init.copy()
                         df_add['num_pat']=10000000+p
