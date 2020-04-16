@@ -18,15 +18,15 @@ df_file=pd.read_csv(init_file, sep=';')
 
 
 df_init=df_file[(df_file['mark']==l_param['init'])]
-df_init['mark_dte']=pd.to_datetime(df_init['mark_dte'])+datetime.timedelta(days=1)
-df_init['mark_ts']=df_init['mark_ts']+1
                             
 l_init=df_init.index.values.tolist()
 # nb erreurs calcule selon le nb d'evt
 nb_err=int(pct_err*len(df_file))
 
+
 # fixer la série "aleatoire" ?
 #random.seed(?)
+
 
 for s, scen in enumerate(l_scenarios):
     
@@ -42,30 +42,30 @@ for s, scen in enumerate(l_scenarios):
             l_init_sel=random.sample(l_init,nb_err)
             err=err+int(nb_err*evt['pct_err'])
             for p in range(err):
+                numpat=df_err['num_pat'][l_evt[p]]
                 if evt['err']=='yob':
                     if evt['typ_err']=='null':
-                        df_err['yob'][l_evt[p]]=None
+                        df_err.loc[df_err['num_pat']==numpat,'yob']=None
                     if evt['typ_err']=='':
-                        df_err['yob'][l_evt[p]]=2030
+                        df_err.loc[df_err['num_pat']==numpat,'yob']=2030
                         
                 if evt['err']=='mob':
                     if evt['typ_err']=='null':
-                        df_err['mob'][l_evt[p]]=None
+                        df_err.loc[df_err['num_pat']==numpat,'mob']=None
                     if evt['typ_err']=='':
-                        df_err['mob'][l_evt[p]]='99'    
+                        df_err.loc[df_err['num_pat']==numpat,'mob']='99'    
                         
                 if evt['err']=='death':
                     if evt['typ_err']=='null':
-                        df_err['death_dte'][l_evt[p]]=None
-                        df_err['death_ts'][l_evt[p]]=None
+                        df_err.loc[df_err['num_pat']==numpat,'death_dte']=None
+                        df_err.loc[df_err['num_pat']==numpat,'death_ts']=None
                     if evt['typ_err']=='date':   
                         if pd.isnull(df_err['death_dte'][l_evt[p]]):
-                            df_err['death_dte'][l_evt[p]]=pd.to_datetime('2030-01-01', format="%Y-%m-%d")
-                            df_err['death_ts'][l_evt[p]]=47483
+                            df_err.loc[df_err['num_pat']==numpat,'death_dte']=pd.to_datetime('2030-01-01', format="%Y-%m-%d")
+                            df_err.loc[df_err['num_pat']==numpat,'death_ts']=47483
                         else:
-                            df_err['death_dte'][l_evt[p]]=pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
-                            df_err['death_ts'][l_evt[p]]=(pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
-                            
+                            df_err.loc[df_err['num_pat']==numpat,'death_dte']=pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
+                            df_err.loc[df_err['num_pat']==numpat,'death_ts']=(pd.to_datetime(df_err['death_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days                            
                 if evt['err']=='mark':
                     if evt['typ_err']=='null':
                         df_err['mark_dte'][l_evt[p]]=None  
@@ -74,7 +74,11 @@ for s, scen in enumerate(l_scenarios):
                         df_err['mark_dte'][l_evt[p]]=pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])
                         df_err['mark_ts'][l_evt[p]]=(pd.to_datetime(df_err['mark_dte'][l_evt[p]])+datetime.timedelta(days=evt['err_sd'])-pd.to_datetime('1900-01-01')).days
                     if evt['typ_err']=='add': 
-                        df_err=pd.DataFrame(df_init[df_init.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
+                        df_add=df_init.copy()
+                        df_add['num_pat']=10000000+p
+                        df_add['mark_dte']=pd.to_datetime(df_add['mark_dte'])+datetime.timedelta(days=evt['err_sd'])
+                        df_add['mark_ts']=df_add['mark_ts']+evt['err_sd']
+                        df_err=pd.DataFrame(df_add[df_add.index==[l_init_sel[p]]]).append(df_err, ignore_index=True) 
                     if evt['typ_err']=='del': 
                         df_err=df_err.drop([l_init_sel[p]])
 
