@@ -1,14 +1,14 @@
 {
     "parameters" :
     {
-        "pop"         : 1000, 
-        "pct_ill"     : 0.1,
-        "begin_dte"   : "2010-01-01",
+        "pop"         : 3000000, 
+        "pct_ill"     : 0.01,
+        "begin_dte"   : "2013-01-01",
         "end_dte"     : "2018-12-31",
         "ref_year"    : 2015,
         "pct_men"     : 0.54,
-        "geo_level"   : "dep",
-        "geo_sel"     : "029",
+        "geo_level"   : "fr",
+        "geo_sel"     : "",
         "age_mean_m"  : 71,
         "age_sd_m"    : 10,
         "age_mean_w"  : 75,
@@ -19,7 +19,7 @@
     },
     "init" : 
     {
-        "mark" : "AVC",
+        "mark" : "SARCOME",
         "age_mean_m"  : 65,
         "age_sd_m"    : 8,
         "age_mean_w"  : 70,

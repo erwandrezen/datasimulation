@@ -1,9 +1,9 @@
 {
     "parameters" :
     {
-        "pop"         : 1000, 
-        "pct_ill"     : 0.1,
-        "begin_dte"   : "2010-01-01",
+        "pop"         : 400000, 
+        "pct_ill"     : 0.01,
+        "begin_dte"   : "2013-01-01",
         "end_dte"     : "2018-12-31",
         "ref_year"    : 2015,
         "pct_men"     : 0.54,
