@@ -10,12 +10,14 @@ import shutil
 from pathlib import Path
 import numpy as np
 from scipy.stats import truncnorm
+import time
+from _collections import defaultdict
 
 #################################################################################
 comprefix="0"  # prefix to be added to 'commune' variable
 
 timeorigin = pd.to_datetime('1900-01-01', format="%Y-%m-%d");
-
+ 
 #################################################################################
 # progress bar (https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console)
 #################################################################################
@@ -42,25 +44,32 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         print()
 
 #################################################################################
+def getRandomDate(begin,end):
+    someday = random.choice(range(1+(end-begin).days));
+    return begin + datetime.timedelta (someday);
+
+
+#################################################################################
 # fonctions
 #################################################################################
 
-def gen_yob (age_mean,age_sd,ref_year):
-     # attribution aleatoire de l'annee de naissance selon la fourchette des parametres
-    #yob=ref_year-(random.randint(age_mean-age_sd,age_mean+age_sd))
+def gen_yob (ref_year, tnorm):
+    
+    # attribution aleatoire de l'annee de naissance selon la fourchette des parametres
+    # yob=ref_year-(random.randint(age_mean-age_sd,age_mean+age_sd))
     # yob=ref_year-int((random.gauss(age_mean, age_sd)))
-    y=truncnorm((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd)
-    year=y.rvs()
-    yob=ref_year-int(year)
+
+    year = tnorm.rvs()
+    yob  = ref_year - int(year)
     
     return yob
 
 ################################################################################
 def gen_mob ():
      # attribution aleatoire du mois de naissance
-    l_month =['01','02','03','04','05','06','07','08','09','10','11','12']
-    m = random.randint(0, len(l_month) - 1)  
-    mob = l_month[m]  
+    l_month = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    m       = random.randint(0, len(l_month) - 1)  
+    mob     = l_month[m]  
     
     return mob
 
@@ -69,24 +78,23 @@ def gen_com():
     # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
     # selon le niveau geo
     com = random.choices(l_depcom,l_comweight)[0]
- 
     com = comprefix + com;
     
     return com
 
 # ################################################################################
 def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
+    
     l_evt_dte=[]
+    
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
         if occ==1:
-            end_dte2=min(init_dte+datetime.timedelta(days=delay_mean),end_dte)
-            l_evt_dte = pd.date_range(init_dte, end_dte2).tolist()
+            end_dte2  = min (init_dte+datetime.timedelta(days=delay_mean),end_dte)
+            evt_dte   = getRandomDate(init_dte, end_dte2)
         else:
-            begin_dte=max(init_dte-datetime.timedelta(days=delay_mean),deb)
-            l_evt_dte = pd.date_range(begin_dte,init_dte).tolist()
-                       
-        evt_dte = random.choice(l_evt_dte)
+            begin_dte = max(init_dte-datetime.timedelta(days=delay_mean),deb)
+            evt_dte   = getRandomDate(begin_dte,init_dte)
     else:
         evt_dte=None
        
@@ -99,10 +107,10 @@ def gen_events_lin (yn_occ,mark,end_dte):
 
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
-        l_evt_dte = pd.date_range(deb, end_dte).tolist()                     
-        evt_dte = random.choice(l_evt_dte)
+        evt_dte = getRandomDate (deb, end_dte);
+
     else:
-        evt_dte=None
+        evt_dte = None
        
     new_evt=[mark,evt_dte]
         
@@ -110,10 +118,10 @@ def gen_events_lin (yn_occ,mark,end_dte):
 
 ################################################################################
 # generation d'un nouveau patient malade
-def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
+def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm):
     
     # tirage au sort l'annee de naissance
-    yob=gen_yob(age_mean,age_sd,ref_year)
+    yob=gen_yob(ref_year,tnorm)
     # tirage au sort du mois de naissance
     mob=gen_mob()
     # tirage au sort de la commune
@@ -125,25 +133,27 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
     # tirage au sort de la date de dc
     if death==1:
         # generation de la liste des dates de dc possibles 
-        end1_dte=min(init_dte+datetime.timedelta(days=delay_death),fin)
-        l_death_dte = pd.date_range(init_dte, end1_dte).tolist()
-        death_dte = random.choice(l_death_dte)
-        end_dte=min(end1_dte,death_dte)
+        end1_dte  = min(init_dte+datetime.timedelta(days=delay_death),fin)
+        death_dte = getRandomDate (init_dte, end1_dte);
+        end_dte   = min(end1_dte,death_dte)
     else:
-        death_dte=None
-        end_dte=fin
+        death_dte = None
+        end_dte   = fin
     
     # generation des events
     evt_pat=[]
     new_pat=[]
     for e, evt in enumerate(l_event):
-        if l_y_n_init[e][0]==1:
+        actualIdx = idxPatInitToRemove[e];
+        if l_y_n_init[e][actualIdx]==1:
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
-                new_evt=gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][0],evt['delay_mean'],evt['mark'],end_dte)
-                new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte]+new_evt
+                new_evt = gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][actualIdx],evt['delay_mean'],evt['mark'],end_dte)
+                new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte]+new_evt
                 evt_pat.append(new_pat)
-            
-        del l_y_n_init[e][0]
+        
+        # il est moins coûteux en temps de ne pas supprimer un élément de la liste
+        # (via del l_y_n_init[e][0]) et d'utiliser un index qui pointe vers le bon élément
+        idxPatInitToRemove[e] += 1;    
 
     new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,l_init['mark'],init_dte]
     evt_pat.append(new_pat)
@@ -151,44 +161,53 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death):
 
 ################################################################################
 # generation d'un nouveau patient non malade
-def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year):
-    
+def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm):
+
     # tirage au sort l'annee de naissance
-    yob=gen_yob(age_mean,age_sd,ref_year)
+    yob = gen_yob(ref_year, tnorm)      
+
     # tirage au sort du mois de naissance
-    mob=gen_mob()
+    mob = gen_mob()
+
     # tirage au sort de la commune
-    com=gen_com()    
+    com = gen_com()      
 
     # tirage au sort de la date de l'event initial
     init_dte=None
     
     # Date de deces : selon proba
     death=y_n_death[0]
+    
     # tirage au sort de la date de dc
     if death==1:
         # generation de la liste des dates de dc possibles 
-        l_death_dte = pd.date_range(deb, fin).tolist()
-        death_dte = random.choice(l_death_dte)
-        end_dte=death_dte
+        death_dte = getRandomDate(deb,fin);
+        end_dte   = death_dte;
     else:
-        death_dte=None
-        end_dte=fin
-    
+        death_dte = None
+        end_dte   = fin
+
     # generation des events
     evt_pat=[]
     new_pat=[]
+    
+    pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte];
+    
     for e,evt in enumerate(l_event):
-        if l_y_n[e][0]==1:
+        actualIdx = idxPatToRemove[e];
+        if l_y_n[e][actualIdx]==1:
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
-                new_evt=gen_events_lin(l_y_n[e][0],evt['mark'],end_dte)
-                new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte]+new_evt
+                new_evt = gen_events_lin(l_y_n[e][actualIdx],evt['mark'],end_dte)
+                new_pat = pat + new_evt
                 evt_pat.append(new_pat) 
         
-        del l_y_n[e][0]
+        # il est moins coûteux en temps de ne pas supprimer un élément de la liste
+        # (via del l_y_n[e][0]) et d'utiliser un index qui pointe vers le bon élément
+        idxPatToRemove[e] += 1;
 
-    new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,'INIT',init_dte]
-    evt_pat.append(new_pat)         
+    new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,'INIT',init_dte]
+    evt_pat.append(new_pat)       
+      
     return evt_pat
 
 #################################################################################
@@ -281,24 +300,33 @@ for e in l_event:
     random.shuffle(y_n)
     l_y_n_init.append(y_n)
 
+idxPatInitToRemove = [0]*len(l_event);
+
 # liste 0/1 (pct de patient non malades) par evt pour les patients "sains"
 l_y_n=[]
 for e in l_event:
     y_n = [0]*((nb_men+nb_women)-int(e['pct_occ_pop']*(nb_men+nb_women))) + [1]*int(e['pct_occ_pop']*(nb_men+nb_women))
     random.shuffle(y_n)
     l_y_n.append(y_n)
-    
+
+idxPatToRemove = [0]*len(l_event);
+
 # ################################################################################
 # generation fichier patients
 # ################################################################################
 
+##############################################################
 # generation de la population des hommes malades
+##############################################################
 l_men_init=[]
 y_n_death = [0]*(nb_men_init-int(l_init['pct_death_m']*nb_men_init)) + [1]*int(l_init['pct_death_m']*nb_men_init)
 random.shuffle(y_n_death)
 
+[age_mean, age_sd, ref_year] = [l_init['age_mean_m'],l_init['age_sd_m'],param['ref_year']];
+tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
 for i in range(nb_men_init):
-    new_pat_init=gen_new_pat_init(i+1,1,l_init['age_mean_m'],l_init['age_sd_m'],param['ref_year'],delay_death_m)
+    new_pat_init=gen_new_pat_init(i+1,1, age_mean, age_sd, ref_year, delay_death_m, tnorm)
 
     for e,evt in enumerate(new_pat_init):
         l_men_init.append(new_pat_init[e])
@@ -307,13 +335,19 @@ for i in range(nb_men_init):
     
     printProgressBar(i, nb_men_init-1, prefix="men   (ill)", length=50)
 
+##############################################################
 # generation de la population des femmes malades 
+##############################################################
 l_women_init=[]
 y_n_death = [0]*(nb_women_init-int(l_init['pct_death_w']*nb_women_init)) + [1]*int(l_init['pct_death_w']*nb_women_init)
 random.shuffle(y_n_death)
+
+[age_mean, age_sd, ref_year] = [l_init['age_mean_w'],l_init['age_sd_w'],param['ref_year']];
+tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
 [i0,i1] = [nb_men_init,int(param['pop']*param['pct_ill'])]
 for j in range(i0,i1):
-    new_pat_init=gen_new_pat_init(j+1,2,l_init['age_mean_w'],l_init['age_sd_w'],param['ref_year'],delay_death_m)
+    new_pat_init=gen_new_pat_init(j+1,2,age_mean, age_sd, ref_year,delay_death_m, tnorm)
 
     for e,evt in enumerate(new_pat_init):
         l_women_init.append(new_pat_init[e])
@@ -322,13 +356,19 @@ for j in range(i0,i1):
     
     printProgressBar(j-i0, i1-i0-1, prefix="women (ill)", length=50)
 
+##############################################################
 # generation de la population des hommes sans la maladie initiale
+##############################################################
 l_men=[]
 y_n_death = [0]*(nb_men-int(param['pct_death_m_pop']*nb_men)) + [1]*int(param['pct_death_m_pop']*nb_men)
 random.shuffle(y_n_death)
+
+[age_mean, age_sd, ref_year] = [int(param['age_mean_m']),int(param['age_sd_m']),param['ref_year']]
+tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
 [i0,i1] = [nb_women_init+nb_men_init, nb_men+int(param['pop']*param['pct_ill'])]
 for k in range(i0,i1):
-    new_pat = gen_new_pat(k+1,1,int(param['age_mean_m']),int(param['age_sd_m']),param['ref_year'])
+    new_pat = gen_new_pat(k+1,1,age_mean, age_sd, ref_year, tnorm)
 
     for e,evt in enumerate(new_pat):  
         l_men.append(new_pat[e])
@@ -337,22 +377,30 @@ for k in range(i0,i1):
 
     printProgressBar(k-i0, i1-i0-1, prefix="men        ", length=50)
 
+##############################################################
 # generation de la population des femmes sans la maladie initiale 
+##############################################################
 l_women=[]
 y_n_death = [0]*(nb_women-int(param['pct_death_w_pop']*nb_women)) + [1]*int(param['pct_death_w_pop']*nb_women)
 random.shuffle(y_n_death)
+
+[age_mean, age_sd, ref_year] = [int(param['age_mean_w']),int(param['age_sd_w']),param['ref_year']]
+tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
 [i0,i1] = [nb_women_init+nb_men_init+nb_men, param['pop']]
 for l in range(i0,i1):
-    new_pat=gen_new_pat(l+1,2,param['age_mean_w'],param['age_sd_w'],param['ref_year'])
+    
+    new_pat = gen_new_pat (l+1, 2, age_mean, age_sd, ref_year, tnorm)
         
-    for e,evt in enumerate(new_pat): 
-        l_women.append(new_pat[e])
+    for e,evt in enumerate(new_pat):  l_women.append(new_pat[e])
         
     del y_n_death[0]
 
     printProgressBar(l-i0, i1-i0-1, prefix="women      ", length=50)
 
+##############################################################
 # preparation export csv, selon format
+##############################################################
 col_evt=[]
 
 col_exp    = ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte', 'mark','mark_dte']  

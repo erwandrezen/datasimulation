@@ -62,17 +62,7 @@
             "nb_occ" : 1,
             "nb_occ_max" : 1,
             "pct_occ_pop" : 0.3
-        },
-        {
-            "mark" : "complication1",
-            "occ" : 1,
-            "pct_occ" : 0.25,
-            "delay_mean" : 90,
-            "delay_sd" : 30,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0.05
-        }        
+        }
     ]
 
 }
