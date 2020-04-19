@@ -217,10 +217,13 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm):
 if len(sys.argv)<1:
     print ("You must provide :")
     print ("   1) [IN]  a json parameter file")
-    sys.exit();
+    sys.exit()
 
-file_param = sys.argv[1];
-
+if len(sys.argv)==0:
+    file_param   = sys.argv[1]
+else:
+    file_param='param_cp.json'
+    
 # lecture du fichiers des parametres generaux
 f_param = json.load(open(file_param))
 
@@ -407,18 +410,18 @@ col_exp    = ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_d
 col_exp_pat= ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte']  
 col_exp_evt= ['num_pat', 'mark','mark_dte']  
 
-df_all     = pd.DataFrame(data=l_men_init+l_women_init+l_men+l_women,columns =col_exp)  
-df_pat_all = df_all.drop(['mark','mark_dte'] ,axis=1)
-df_pat_all = df_pat_all.drop_duplicates()
-
-df_evt_all = df_all.dropna(subset=['mark_dte'])
-df_evt_all = df_evt_all.drop(['sex','yob','mob','com',l_init["mark"],'death','death_dte'] ,axis=1)
-df_all     = pd.merge(df_pat_all,df_evt_all,on='num_pat',how='left')
-df_all     = df_all.drop(l_init["mark"] ,axis=1)    
-
-df_all["death_ts"] = (pd.to_datetime(df_all["death_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
-df_all["mark_ts"]  = (pd.to_datetime(df_all["mark_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
-df_all["birth_ts"] = (pd.to_datetime(df_all["yob"].map(str)+df_all["mob"].map(str)+'01', format="%Y%m%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
+#df_all     = pd.DataFrame(data=l_men_init+l_women_init+l_men+l_women,columns =col_exp)  
+#df_pat_all = df_all.drop(['mark','mark_dte'] ,axis=1)
+#df_pat_all = df_pat_all.drop_duplicates()
+#
+#df_evt_all = df_all.dropna(subset=['mark_dte'])
+#df_evt_all = df_evt_all.drop(['sex','yob','mob','com',l_init["mark"],'death','death_dte'] ,axis=1)
+#df_all     = pd.merge(df_pat_all,df_evt_all,on='num_pat',how='left')
+#df_all     = df_all.drop(l_init["mark"] ,axis=1)    
+#
+#df_all["death_ts"] = (pd.to_datetime(df_all["death_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
+#df_all["mark_ts"]  = (pd.to_datetime(df_all["mark_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
+#df_all["birth_ts"] = (pd.to_datetime(df_all["yob"].map(str)+df_all["mob"].map(str)+'01', format="%Y%m%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
 
 df_init     = pd.DataFrame(data=l_men_init+l_women_init,columns =col_exp)   
 df_pat_init = df_init.drop(['mark','mark_dte'] ,axis=1)
@@ -432,6 +435,16 @@ df_init     = df_init.drop(l_init["mark"] ,axis=1)
 df_init["death_ts"] = (pd.to_datetime(df_init["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
 df_init["mark_ts"]  = (pd.to_datetime(df_init["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_init["birth_ts"] = (pd.to_datetime(df_init["yob"].map(str)+df_init["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
+
+
+l_initpat=df_pat_init['num_pat'].values.tolist()
+# nb erreurs calcule selon le nb d'evt
+nb_err=int(0.8*len(df_pat_init))
+l_init80=random.sample(l_initpat,nb_err)
+df_init80=df_init[df_init['num_pat'].isin(l_init80)]
+
+
+
 
 df_healthy     = pd.DataFrame(data=l_men+l_women,columns =col_exp)
 df_pat_healthy = df_healthy.drop(['mark','mark_dte'] ,axis=1)
@@ -447,6 +460,13 @@ df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
 
 # export de la population dans un fichier csv
-df_all.    to_csv (param["rep_file"]+ file_all,     index=False, sep=';')
-df_init.   to_csv (param["rep_file"]+ file_init ,   index=False, sep=';')
-df_healthy.to_csv (param["rep_file"]+ file_healthy, index=False, sep=';')
+df_init.to_csv(param["rep_file"]+'file_init.csv',index=False,sep=';')
+df_init80.to_csv(param["rep_file"]+'file_init80.csv',index=False,sep=';')
+
+df_healthy.to_csv(param["rep_file"]+'file_healthy.csv',index=False,sep=';')
+
+df_all=pd.concat([df_healthy,df_init])
+df_all80=pd.concat([df_healthy,df_init80])
+df_all.to_csv(param["rep_file"]+'file_all.csv',index=False,sep=';')
+df_all80.to_csv(param["rep_file"]+'file_all80.csv',index=False,sep=';')
+
