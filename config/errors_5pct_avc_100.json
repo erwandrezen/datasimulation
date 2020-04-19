@@ -1,0 +1,93 @@
+{    
+    "parameters" :
+    {
+        "pct_err"     : 0.5,
+        "init" : "AVC",
+        "init_file" : "F:/PEPS/Simulated Data/files/avc/trial/file_init.csv",
+        "dir_err" : "F:/PEPS/Simulated Data/files/avc/trial/errors/pct5"
+    },
+
+    "scenarios" : 
+    [  
+       {
+           "scenario": "death_dte",
+           "nb_files"      : 2,
+           "evt" : [
+                {
+                    "err"     : "death",
+                    "typ_err" : "date",
+                    "pct_err" : 1,
+                    "err_sd"  : 2
+                }
+            ]
+        },
+       {
+           "scenario": "avc_dte",
+           "nb_files"      : 3,
+           "evt" : [
+                 {
+                    "err"     : "mark",
+                    "typ_err" : "AVC",
+                    "pct_err" : 1,
+                    "err_sd"  : 1
+                }
+            ]
+        },
+       {
+           "scenario": "yob_null",
+           "nb_files"      : 3,
+           "evt" : [
+                 {
+                    "err"     : "yob",
+                    "typ_err" : "null",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        },        
+       {
+           "scenario": "mob_val",
+           "nb_files"      : 3,
+           "evt" : [
+                 {
+                    "err"     : "mob",
+                    "typ_err" : "",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        },        
+       {
+           "scenario": "death_avc_dte",
+           "nb_files"      : 1,
+           "evt" : [
+                {
+                    "err"     : "death",
+                    "typ_err" : "date",
+                    "pct_err" : 0.5,
+                    "err_sd"  : 2
+                },
+                {
+                    "err"     : "mark",
+                    "typ_err" : "AVC",
+                    "pct_err" : 0.5,
+                    "err_sd"  : 1
+                    }
+                    
+            ]
+        },
+       {
+           "scenario": "commune_diff",
+           "nb_files"      : 2,
+           "evt" : [
+                {
+                    "err"     : "comm",
+                    "typ_err" : "",
+                    "pct_err" : 1,
+                    "err_sd"  : 0
+                }
+            ]
+        }   
+    ]
+
+}

@@ -33,7 +33,7 @@ for s, scen in enumerate(l_scenarios):
     nb_files=l_scenarios[s]["nb_files"]
     l_events=l_scenarios[s]["evt"]
     for f in range(nb_files):
-        file_name=l_scenarios[s]["scenario"]+"_n"+str(f)+".csv"
+        file_name=l_scenarios[s]["scenario"]+"_n"+str(f)+ ".csv"
         df_err=df_file.copy()
         err=0
         for e,evt in enumerate(l_scenarios[s]["evt"]):
