@@ -1,0 +1,103 @@
+{
+    "parameters" :
+    {
+        "pop"         : 30000, 
+        "pct_ill"     : 1,
+        "first_num_pat" : 1000000,        
+        "begin_dte"   : "2010-01-01",
+        "end_dte"     : "2017-12-31",
+        "ref_year"    : 2013,
+        "pct_men"     : 0.54,
+        "geo_level"   : "fr",
+        "geo_sel"     : "",
+        "age_mean_m"  : 0,
+        "age_sd_m"    : 0,
+        "age_mean_w"  : 0,
+        "age_sd_w"    : 0,
+        "pct_death_m_pop" : 0,
+        "pct_death_w_pop" : 0,
+        "dir_file" : "F:/PEPS/Simulated Data/files/cancer/",
+        "file_all" : "file_all",
+        "file_healthy" : "file_healthy",
+        "file_ill" : "file_ill",
+        "seed" : 0
+    },
+    "init" : 
+    {
+        "mark" : "CHIR",
+        "center" : "CANCER" ,
+        "age_mean_m"  : 618
+        "age_sd_m"    : 12,
+        "age_mean_w"  : 68,
+        "age_sd_w"    : 12,
+        "pct_death_m" : 0.6,
+        "delay_death_m" : 5,
+        "pct_death_w" : 0.3,
+        "delay_death_w" : 5
+    },
+
+    "events" : 
+    [
+        {
+            "mark" : "chimio",
+            "occ" : -1,
+            "pct_occ" : 1,
+            "delay_mean" : 180,
+            "delay_sd" : 160,
+            "nb_occ" : 1,
+            "nb_occ_max" : 3,
+            "pct_occ_pop" : 0
+        },	
+        {
+            "mark" : "chimio",
+            "occ" : 1,
+            "pct_occ" : 0.3,
+            "delay_mean" : 365,
+            "delay_sd" : 300,
+            "nb_occ" : 3,
+            "nb_occ_max" : 6,
+            "pct_occ_pop" : 0
+        },
+        {
+            "mark" : "radioth",
+            "occ" : -1,
+            "pct_occ" : 1,
+            "delay_mean" : 365,
+            "delay_sd" : 350,
+            "nb_occ" : 1,
+            "nb_occ_max" : 3,
+            "pct_occ_pop" : 0
+        },
+        {
+            "mark" : "diab",
+            "occ" : -1,
+            "pct_occ" : 0.1,
+            "delay_mean" : 365,
+            "delay_sd" : 350,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0
+        },
+        {
+            "mark" : "hta",
+            "occ" : -1,
+            "pct_occ" : 0.6,
+            "delay_mean" : 365,
+            "delay_sd" : 350,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0
+        },
+        {
+            "mark" : "coro",
+            "occ" : -1,
+            "pct_occ" : 0.002,
+            "delay_mean" : 365,
+            "delay_sd" : 350,
+            "nb_occ" : 1,
+            "nb_occ_max" : 1,
+            "pct_occ_pop" : 0
+        }
+    ]
+
+}
