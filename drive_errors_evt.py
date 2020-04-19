@@ -6,7 +6,15 @@ import datetime
 import sys
 import random
 
-import drive_cp_line as fct
+
+################################################################################
+def gen_com():
+    # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
+    # selon le niveau geo
+    com = random.choices(l_depcom,l_comweight)[0]
+    
+    return com
+
 
 
 if len(sys.argv)<1:
@@ -25,6 +33,30 @@ l_scenarios=f_errors['scenarios']
 l_param=f_errors['parameters']
 pct_err=l_param["pct_err"]
 init_file=l_param["init_file"]
+
+
+# constitution du dataframe geo correspondant aux paramètres choisis
+# tirage au sort de la commune au niveau de la Fr, d'une région ou d'un departement
+if l_param['geo_level']=='fr':
+    header_row = ['DEPCOM', 'DEP', 'REG', 'PTOT', 'weight', 'weight_reg', 'weight_dep']
+    df=pd.read_csv(filepath_or_buffer='data_ref/communes_fr.csv',sep=';', header=0, names=header_row)
+    df_com=df
+
+elif l_param['geo_level']=='reg':
+    header_row = ['DEPCOM', 'DEP', 'REG', 'PTOT', 'weight_fr', 'weight', 'weight_dep']
+    df=pd.read_csv(filepath_or_buffer='data_ref/communes_fr.csv',sep=';',header=0, names=header_row)
+    df_com=df[(df['REG']==l_param['geo_sel'])]
+
+elif l_param['geo_level']=='dep':
+    header_row = ['DEPCOM', 'DEP', 'REG', 'PTOT', 'weight_fr', 'weight_reg', 'weight']
+    df=pd.read_csv(filepath_or_buffer='data_ref/communes_fr.csv',sep=';', header=0, names=header_row)
+    df_com=df[(df['DEP']==l_param['geo_sel'])]
+
+df_com = df_com.reset_index(drop=True)
+
+l_depcom    = df_com["DEPCOM"]
+l_comweight = df_com["weight"]
+
 
 df_file=pd.read_csv(init_file, sep=';')
 
@@ -74,7 +106,7 @@ for s, scen in enumerate(l_scenarios):
                         com=df_err['com'][l_evt[p]]
                         while com==df_err['com'][l_evt[p]]:
                             # tirage au sort de la commune
-                            com=fct.gen_com()  
+                            com=gen_com()  
                             
                         df_err.loc[df_err['num_pat']==numpat,'com']=com    
 

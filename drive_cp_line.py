@@ -78,7 +78,7 @@ def gen_com():
     # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
     # selon le niveau geo
     com = random.choices(l_depcom,l_comweight)[0]
-    com = comprefix + com;
+#    com = comprefix + com;
     
     return com
 
