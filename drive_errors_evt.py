@@ -3,12 +3,24 @@
 import pandas as pd
 import json
 import datetime
-
+import sys
 import random
 
 import drive_cp_line as fct
 
-f_errors = json.load(open("param_errors.json"))
+
+if len(sys.argv)<1:
+    print ("You must provide :")
+    print ("   1) [IN]  a json parameter file")
+    sys.exit()
+
+if len(sys.argv)==0:
+    file_param   = sys.argv[1]
+else:
+    file_param='param_errors.json'
+
+
+f_errors = json.load(open(file_param))
 l_scenarios=f_errors['scenarios']
 l_param=f_errors['parameters']
 pct_err=l_param["pct_err"]
@@ -33,7 +45,7 @@ for s, scen in enumerate(l_scenarios):
     nb_files=l_scenarios[s]["nb_files"]
     l_events=l_scenarios[s]["evt"]
     for f in range(nb_files):
-        file_name=l_scenarios[s]["scenario"]+"_n"+str(f)+ ".csv"
+        file_name=l_scenarios[s]["scenario"]+"_n"+str(f)+".csv"
         df_err=df_file.copy()
         err=0
         for e,evt in enumerate(l_scenarios[s]["evt"]):
@@ -96,6 +108,6 @@ for s, scen in enumerate(l_scenarios):
 
                         
 
-        df_err.to_csv(l_param["dir_err"]+file_name,index=False,sep=';')                
+        df_err.to_csv(l_param["rep_err"]+file_name,index=False,sep=';')                
 
        
