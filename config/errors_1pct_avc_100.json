@@ -1,7 +1,7 @@
 {    
     "parameters" :
     {
-        "pct_err"     : 0.1,
+        "pct_err"     : 0.01,
         "init" : "AVC",
         "init_file" : "F:/PEPS/Simulated Data/files/avc/trial/file_init.csv",
         "dir_err" : "F:/PEPS/Simulated Data/files/avc/trial/errors/pct1"
