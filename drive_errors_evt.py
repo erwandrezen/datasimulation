@@ -108,6 +108,6 @@ for s, scen in enumerate(l_scenarios):
 
                         
 
-        df_err.to_csv(l_param["rep_err"]+file_name,index=False,sep=';')                
+        df_err.to_csv(l_param["dir_err"]+file_name,index=False,sep=';')                
 
        
