@@ -78,9 +78,19 @@ def gen_com():
     # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
     # selon le niveau geo
     com = random.choices(l_depcom,l_comweight)[0]
-#    com = comprefix + com;
+    #com = comprefix + com;
     
     return com
+
+################################################################################
+def gen_finess():
+    # attribution aleatoire ponderee (cf. sae 2016 (weight)) du finess du centre
+    # d'examen de l'evt init
+    finess = random.choices(l_finess,l_finessweight)[0]
+    
+    return finess
+
+
 
 # ################################################################################
 def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
@@ -118,7 +128,7 @@ def gen_events_lin (yn_occ,mark,end_dte):
 
 ################################################################################
 # generation d'un nouveau patient malade
-def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm):
+def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,idx_y_n_death):
     
     # tirage au sort l'annee de naissance
     yob=gen_yob(ref_year,tnorm)
@@ -129,7 +139,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm):
     # tirage au sort de la date de l'event initial
     init_dte = random.choice(l_date)
     # Date de deces oui/non
-    death=y_n_death[0]
+    death=y_n_death[idx_y_n_death]
     # tirage au sort de la date de dc
     if death==1:
         # generation de la liste des dates de dc possibles 
@@ -149,7 +159,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm):
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
                 new_evt = gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][actualIdx],evt['delay_mean'],evt['mark'],end_dte)
                 new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte]+new_evt
-                evt_pat.append(new_pat)
+                evt_pat.append(new_pat)                
         
         # il est moins coûteux en temps de ne pas supprimer un élément de la liste
         # (via del l_y_n_init[e][0]) et d'utiliser un index qui pointe vers le bon élément
@@ -157,11 +167,18 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm):
 
     new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,l_init['mark'],init_dte]
     evt_pat.append(new_pat)
+
+    # tirage au sort de la commune
+    finess=gen_finess()    
+    new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,finess,init_dte]
+    evt_pat.append(new_pat)
+
+    
     return evt_pat
 
 ################################################################################
 # generation d'un nouveau patient non malade
-def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm):
+def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm,idx_y_n_death):
 
     # tirage au sort l'annee de naissance
     yob = gen_yob(ref_year, tnorm)      
@@ -176,7 +193,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm):
     init_dte=None
     
     # Date de deces : selon proba
-    death=y_n_death[0]
+    death=y_n_death[idx_y_n_death]
     
     # tirage au sort de la date de dc
     if death==1:
@@ -213,7 +230,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm):
 #################################################################################
 # debut programme
 #################################################################################
-
+#print(datetime.datetime.now())
 if len(sys.argv)<1:
     print ("You must provide :")
     print ("   1) [IN]  a json parameter file")
@@ -232,17 +249,17 @@ l_init  = f_param['init']
 l_event = f_param['events']
 
 # if no output directory is defined, we create one in the current folder
-if not "rep_file" in param: 
+if not "dir_file" in param: 
     base = Path(file_param).stem;
     outputDir = "run_" + base + "_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    print ("no 'rep_file' defined -> creating directory", outputDir);
+    print ("no 'dir_file' defined -> creating directory", outputDir);
     os.mkdir (outputDir); 
-    param["rep_file"] = outputDir + "/"
+    param["dir_file"] = outputDir + "/"
 
-if not param["rep_file"].endswith("/"):  param["rep_file"] += "/"
+if not param["dir_file"].endswith("/"):  param["dir_file"] += "/"
 
 # we also copy the configuration file in the output directory
-shutil.copy(file_param, param["rep_file"] + os.path.basename(file_param));
+shutil.copy(file_param, param["dir_file"] + os.path.basename(file_param));
 
 file_all     = param.get("file_all",     "file_all.csv")
 file_init    = param.get("file_init",    "file_init.csv")
@@ -295,6 +312,39 @@ df_com = df_com.reset_index(drop=True)
 l_depcom    = df_com["DEPCOM"]
 l_comweight = df_com["weight"]
 
+
+
+# constitution du dataframe finess  correspondant a l'evenement init
+# tirage au sort de l'etablissement de realisation du soin
+if l_init['center']=='AVC':
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight_fr']
+    df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';', header=0, names=header_row)
+    df_finess=df_sae[df_sae['avc']==1]
+
+elif l_init['center']=='SARCOME':
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight','weight_cancer','weight_dep','weight_reg','weight_fr']
+    df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
+    df_finess=df_sae[df_sae['sarcome']==1]
+
+elif l_init['center']=='CANCER':
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight','weight_dep','weight_reg','weight_fr']
+    df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
+    df_finess=df_sae[df_sae['cancer']==1]
+
+else:
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight']
+    df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
+    df_finess=df_sae
+
+
+df_finess = df_finess.reset_index(drop=True)
+
+l_finess    = df_finess["FI"]
+l_finessweight = df_finess["weight"]
+
+
+
+
 # liste 0/1 (pct de patient malades) par evt pour les patients "init"
 # permet de maitriser le nb exact d'evt et donc respecter les parametres  
 l_y_n_init=[]
@@ -321,36 +371,43 @@ idxPatToRemove = [0]*len(l_event);
 ##############################################################
 # generation de la population des hommes malades
 ##############################################################
-l_men_init=[]
-y_n_death = [0]*(nb_men_init-int(l_init['pct_death_m']*nb_men_init)) + [1]*int(l_init['pct_death_m']*nb_men_init)
-random.shuffle(y_n_death)
+#print(datetime.datetime.now())
 
-[age_mean, age_sd, ref_year] = [l_init['age_mean_m'],l_init['age_sd_m'],param['ref_year']];
-tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+l_men_init=[]
+if nb_men_init>0:
+    y_n_death = [0]*(nb_men_init-int(l_init['pct_death_m']*nb_men_init)) + [1]*int(l_init['pct_death_m']*nb_men_init)
+    random.shuffle(y_n_death)
+    idx_y_n_death=0
+    [age_mean, age_sd, ref_year] = [l_init['age_mean_m'],l_init['age_sd_m'],param['ref_year']];
+    tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
 
 for i in range(nb_men_init):
-    new_pat_init=gen_new_pat_init(i+1,1, age_mean, age_sd, ref_year, delay_death_m, tnorm)
+    new_pat_init=gen_new_pat_init(i+1,1, age_mean, age_sd, ref_year, delay_death_m, tnorm,idx_y_n_death)
 
     for e,evt in enumerate(new_pat_init):
         l_men_init.append(new_pat_init[e])
        
-    del y_n_death[0]
+    #del y_n_death[0]
+    idx_y_n_death=idx_y_n_death+1
     
     printProgressBar(i, nb_men_init-1, prefix="men   (ill)", length=50)
 
 ##############################################################
 # generation de la population des femmes malades 
 ##############################################################
+#print(datetime.datetime.now())
 l_women_init=[]
-y_n_death = [0]*(nb_women_init-int(l_init['pct_death_w']*nb_women_init)) + [1]*int(l_init['pct_death_w']*nb_women_init)
-random.shuffle(y_n_death)
+if nb_women_init>0:    
+    y_n_death = [0]*(nb_women_init-int(l_init['pct_death_w']*nb_women_init)) + [1]*int(l_init['pct_death_w']*nb_women_init)
+    random.shuffle(y_n_death)
+    idx_y_n_death=0
 
-[age_mean, age_sd, ref_year] = [l_init['age_mean_w'],l_init['age_sd_w'],param['ref_year']];
-tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+    [age_mean, age_sd, ref_year] = [l_init['age_mean_w'],l_init['age_sd_w'],param['ref_year']];
+    tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
 
 [i0,i1] = [nb_men_init,int(param['pop']*param['pct_ill'])]
 for j in range(i0,i1):
-    new_pat_init=gen_new_pat_init(j+1,2,age_mean, age_sd, ref_year,delay_death_m, tnorm)
+    new_pat_init=gen_new_pat_init(j+1,2,age_mean, age_sd, ref_year,delay_death_m, tnorm,idx_y_n_death)
 
     for e,evt in enumerate(new_pat_init):
         l_women_init.append(new_pat_init[e])
@@ -362,16 +419,22 @@ for j in range(i0,i1):
 ##############################################################
 # generation de la population des hommes sans la maladie initiale
 ##############################################################
+#print(datetime.datetime.now())   
+    
 l_men=[]
-y_n_death = [0]*(nb_men-int(param['pct_death_m_pop']*nb_men)) + [1]*int(param['pct_death_m_pop']*nb_men)
-random.shuffle(y_n_death)
+if nb_men>0:         
+    y_n_death = [0]*(nb_men-int(param['pct_death_m_pop']*nb_men)) + [1]*int(param['pct_death_m_pop']*nb_men)
+    random.shuffle(y_n_death)
+    idx_y_n_death=0
 
-[age_mean, age_sd, ref_year] = [int(param['age_mean_m']),int(param['age_sd_m']),param['ref_year']]
-tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
+    [age_mean, age_sd, ref_year] = [int(param['age_mean_m']),int(param['age_sd_m']),param['ref_year']]
+    tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+
 
 [i0,i1] = [nb_women_init+nb_men_init, nb_men+int(param['pop']*param['pct_ill'])]
 for k in range(i0,i1):
-    new_pat = gen_new_pat(k+1,1,age_mean, age_sd, ref_year, tnorm)
+    new_pat = gen_new_pat(k+1,1,age_mean, age_sd, ref_year, tnorm,idx_y_n_death)
 
     for e,evt in enumerate(new_pat):  
         l_men.append(new_pat[e])
@@ -383,17 +446,23 @@ for k in range(i0,i1):
 ##############################################################
 # generation de la population des femmes sans la maladie initiale 
 ##############################################################
-l_women=[]
-y_n_death = [0]*(nb_women-int(param['pct_death_w_pop']*nb_women)) + [1]*int(param['pct_death_w_pop']*nb_women)
-random.shuffle(y_n_death)
+#print(datetime.datetime.now()) 
 
-[age_mean, age_sd, ref_year] = [int(param['age_mean_w']),int(param['age_sd_w']),param['ref_year']]
-tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
+l_women=[]
+    
+if nb_women>0:         
+    y_n_death = [0]*(nb_women-int(param['pct_death_w_pop']*nb_women)) + [1]*int(param['pct_death_w_pop']*nb_women)
+    random.shuffle(y_n_death)
+    idx_y_n_death=0
+
+
+    [age_mean, age_sd, ref_year] = [int(param['age_mean_w']),int(param['age_sd_w']),param['ref_year']]
+    tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
 
 [i0,i1] = [nb_women_init+nb_men_init+nb_men, param['pop']]
 for l in range(i0,i1):
     
-    new_pat = gen_new_pat (l+1, 2, age_mean, age_sd, ref_year, tnorm)
+    new_pat = gen_new_pat (l+1, 2, age_mean, age_sd, ref_year, tnorm,idx_y_n_death)
         
     for e,evt in enumerate(new_pat):  l_women.append(new_pat[e])
         
@@ -404,24 +473,13 @@ for l in range(i0,i1):
 ##############################################################
 # preparation export csv, selon format
 ##############################################################
+#print('Prepare export')
+#print(datetime.datetime.now())
 col_evt=[]
 
 col_exp    = ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte', 'mark','mark_dte']  
 col_exp_pat= ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte']  
 col_exp_evt= ['num_pat', 'mark','mark_dte']  
-
-#df_all     = pd.DataFrame(data=l_men_init+l_women_init+l_men+l_women,columns =col_exp)  
-#df_pat_all = df_all.drop(['mark','mark_dte'] ,axis=1)
-#df_pat_all = df_pat_all.drop_duplicates()
-#
-#df_evt_all = df_all.dropna(subset=['mark_dte'])
-#df_evt_all = df_evt_all.drop(['sex','yob','mob','com',l_init["mark"],'death','death_dte'] ,axis=1)
-#df_all     = pd.merge(df_pat_all,df_evt_all,on='num_pat',how='left')
-#df_all     = df_all.drop(l_init["mark"] ,axis=1)    
-#
-#df_all["death_ts"] = (pd.to_datetime(df_all["death_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
-#df_all["mark_ts"]  = (pd.to_datetime(df_all["mark_dte"], format="%Y-%m-%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
-#df_all["birth_ts"] = (pd.to_datetime(df_all["yob"].map(str)+df_all["mob"].map(str)+'01', format="%Y%m%d")-pd.to_datetime('1900-01-01', format="%Y-%m-%d")).dt.days
 
 df_init     = pd.DataFrame(data=l_men_init+l_women_init,columns =col_exp)   
 df_pat_init = df_init.drop(['mark','mark_dte'] ,axis=1)
@@ -460,13 +518,14 @@ df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
 
 # export de la population dans un fichier csv
-df_init.to_csv(param["rep_file"]+'file_init.csv',index=False,sep=';')
-df_init80.to_csv(param["rep_file"]+'file_init80.csv',index=False,sep=';')
+df_init.to_csv(param["dir_file"]+'file_init.csv',index=False,sep=';')
+df_init80.to_csv(param["dir_file"]+'file_init80.csv',index=False,sep=';')
 
-df_healthy.to_csv(param["rep_file"]+'file_healthy.csv',index=False,sep=';')
+df_healthy.to_csv(param["dir_file"]+'file_healthy.csv',index=False,sep=';')
 
-df_all=pd.concat([df_healthy,df_init])
-df_all80=pd.concat([df_healthy,df_init80])
-df_all.to_csv(param["rep_file"]+'file_all.csv',index=False,sep=';')
-df_all80.to_csv(param["rep_file"]+'file_all80.csv',index=False,sep=';')
-
+df_all=pd.concat([df_healthy,df_init],sort=False)
+df_all80=pd.concat([df_healthy,df_init80],sort=False)
+df_all.to_csv(param["dir_file"]+'file_all.csv',index=False,sep=';')
+df_all80.to_csv(param["dir_file"]+'file_all80.csv',index=False,sep=';')
+#print('Fin')
+#print(datetime.datetime.now())
