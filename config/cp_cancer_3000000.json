@@ -1,7 +1,7 @@
 {
     "parameters" :
     {
-        "pop"         : 30000, 
+        "pop"         : 3000000, 
         "pct_ill"     : 1,
         "first_num_pat" : 1000000,        
         "begin_dte"   : "2010-01-01",
