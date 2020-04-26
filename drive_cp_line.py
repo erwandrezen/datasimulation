@@ -105,8 +105,9 @@ def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
             evt_dte   = getRandomDate(begin_dte,init_dte)
     else:
         evt_dte=None
-       
-    new_evt=[mark,evt_dte]
+    
+    finess=None
+    new_evt=[mark,evt_dte,finess]
 
     return new_evt
 
@@ -116,10 +117,10 @@ def gen_events_lin (yn_occ,mark,end_dte):
     if yn_occ==1:
     # generation de la liste des dates d'evt possibles
         evt_dte = getRandomDate (deb, end_dte);
-
     else:
         evt_dte = None
-       
+     
+    finess = None
     new_evt=[mark,evt_dte]
         
     return new_evt
@@ -136,6 +137,8 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,id
     com=gen_com()    
     # tirage au sort de la date de l'event initial
     init_dte = random.choice(l_date)
+    # finess 
+    finess=gen_finess() 
     # Date de deces oui/non
     death=y_n_death[idx_y_n_death]
     # tirage au sort de la date de dc
@@ -163,13 +166,13 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,id
         # (via del l_y_n_init[e][0]) et d'utiliser un index qui pointe vers le bon élément
         idxPatInitToRemove[e] += 1;    
 
-    new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,l_init['mark'],init_dte]
+    new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,l_init['mark'],init_dte,finess]
     evt_pat.append(new_pat)
     
-    # tirage au sort de la commune
-    finess=gen_finess()    
-    new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,finess,init_dte]
-    evt_pat.append(new_pat)
+    # tirage au sort du finess de l'evt init 
+    #finess=gen_finess()    
+    #new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,finess,init_dte]
+    #evt_pat.append(new_pat)
     
     return evt_pat
 
@@ -188,7 +191,8 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm,idx_y_n_death):
 
     # tirage au sort de la date de l'event initial
     init_dte=None
-    
+    # finess 
+    finess=None     
     # Date de deces : selon proba
     death=y_n_death[idx_y_n_death]
     
@@ -219,7 +223,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm,idx_y_n_death):
         # (via del l_y_n[e][0]) et d'utiliser un index qui pointe vers le bon élément
         idxPatToRemove[e] += 1;
 
-    new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,'INIT',init_dte]
+    new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,'INIT',init_dte,finess]
     evt_pat.append(new_pat)       
       
     return evt_pat
@@ -427,7 +431,8 @@ for j in range(i0,i1):
     for e,evt in enumerate(new_pat_init):
         l_women_init.append(new_pat_init[e])
 
-    del y_n_death[0]
+    #del y_n_death[0]
+    idx_y_n_death=idx_y_n_death+1
     
     printProgressBar(j-i0, i1-i0-1, prefix="women (ill)", length=50)
 
@@ -454,8 +459,9 @@ for k in range(i0,i1):
     for e,evt in enumerate(new_pat):  
         l_men.append(new_pat[e])
         
-    del y_n_death[0]
-
+    #del y_n_death[0]
+    idx_y_n_death=idx_y_n_death+1
+    
     printProgressBar(k-i0, i1-i0-1, prefix="men        ", length=50)
 
 ##############################################################
@@ -481,7 +487,8 @@ for l in range(i0,i1):
         
     for e,evt in enumerate(new_pat):  l_women.append(new_pat[e])
         
-    del y_n_death[0]
+    #del y_n_death[0]
+    idx_y_n_death=idx_y_n_death+1
 
     printProgressBar(l-i0, i1-i0-1, prefix="women      ", length=50)
 
@@ -492,12 +499,12 @@ for l in range(i0,i1):
 #print(datetime.datetime.now())
 col_evt=[]
 
-col_exp    = ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte', 'mark','mark_dte']  
+col_exp    = ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte', 'mark','mark_dte','finess']  
 col_exp_pat= ['num_pat', 'sex','yob','mob','com',l_init["mark"],'death','death_dte']  
-col_exp_evt= ['num_pat', 'mark','mark_dte']  
+col_exp_evt= ['num_pat', 'mark','mark_dte','finess']  
 
 df_init     = pd.DataFrame(data=l_men_init+l_women_init,columns =col_exp)   
-df_pat_init = df_init.drop(['mark','mark_dte'] ,axis=1)
+df_pat_init = df_init.drop(['mark','mark_dte','finess'] ,axis=1)
 df_pat_init = df_pat_init.drop_duplicates()
 
 df_evt_init = df_init.dropna(subset=['mark_dte'])
@@ -520,7 +527,7 @@ df_init80=df_init[df_init['num_pat'].isin(l_init80)]
 
 
 df_healthy     = pd.DataFrame(data=l_men+l_women,columns =col_exp)
-df_pat_healthy = df_healthy.drop(['mark','mark_dte'] ,axis=1)
+df_pat_healthy = df_healthy.drop(['mark','mark_dte','finess'] ,axis=1)
 df_pat_healthy = df_pat_healthy.drop_duplicates()
 
 df_evt_healthy = df_healthy.dropna(subset=['mark_dte'])
