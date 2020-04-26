@@ -25,7 +25,7 @@
     "init" : 
     {
         "mark" : "AVC",
-		"center" : "AVC"
+		"center" : "AVC",
         "age_mean_m"  : 71,
         "age_sd_m"    : 14,
         "age_mean_w"  : 79,

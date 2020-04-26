@@ -14,7 +14,7 @@ import time
 from _collections import defaultdict
 
 #################################################################################
-comprefix="0"  # prefix to be added to 'commune' variable
+comprefix=""  # prefix to be added to 'commune' variable
 
 timeorigin = pd.to_datetime('1900-01-01', format="%Y-%m-%d");
  
@@ -78,7 +78,7 @@ def gen_com():
     # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
     # selon le niveau geo
     com = random.choices(l_depcom,l_comweight)[0]
-    #com = comprefix + com;
+#    com = comprefix + com;
     
     return com
 
@@ -89,8 +89,6 @@ def gen_finess():
     finess = random.choices(l_finess,l_finessweight)[0]
     
     return finess
-
-
 
 # ################################################################################
 def gen_events_init_lin (init_dte,occ,yn_occ,delay_mean,mark,end_dte):
@@ -159,7 +157,7 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,id
             for o in range (random.randint(evt['nb_occ'], evt['nb_occ_max'])):
                 new_evt = gen_events_init_lin(init_dte,evt['occ'],l_y_n_init[e][actualIdx],evt['delay_mean'],evt['mark'],end_dte)
                 new_pat = [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte]+new_evt
-                evt_pat.append(new_pat)                
+                evt_pat.append(new_pat)
         
         # il est moins coûteux en temps de ne pas supprimer un élément de la liste
         # (via del l_y_n_init[e][0]) et d'utiliser un index qui pointe vers le bon élément
@@ -167,12 +165,11 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,id
 
     new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,l_init['mark'],init_dte]
     evt_pat.append(new_pat)
-
+    
     # tirage au sort de la commune
     finess=gen_finess()    
     new_pat= [num_pat+param['first_num_pat'],sex,yob,mob,com,init_dte,death,death_dte,finess,init_dte]
     evt_pat.append(new_pat)
-
     
     return evt_pat
 
@@ -236,7 +233,7 @@ if len(sys.argv)<1:
     print ("   1) [IN]  a json parameter file")
     sys.exit()
 
-if len(sys.argv)==0:
+if len(sys.argv)>1:
     file_param   = sys.argv[1]
 else:
     file_param='param_cp.json'
@@ -247,6 +244,17 @@ f_param = json.load(open(file_param))
 param   = f_param['parameters']
 l_init  = f_param['init']
 l_event = f_param['events']
+
+traces  = param.get("traces", 0);
+
+# if we provide a second argument, we take it as the "dir_file" parameter
+# if this argument is empty, we remove the one provided in the json file
+# in order to get an automatically generated output dir
+if len(sys.argv) >= 3:
+    if len(sys.argv[2])>0:
+        param["dir_file"] = sys.argv[2];
+    else:
+        del  param["dir_file"];
 
 # if no output directory is defined, we create one in the current folder
 if not "dir_file" in param: 
@@ -286,6 +294,16 @@ fin = datetime.datetime.strptime(param['end_dte'],  '%Y-%m-%d')
 delay_death_m = l_init['delay_death_m']*365
 delay_death_w = l_init['delay_death_w']*365
 
+if traces>=1:
+    print ("nb_men_init   :", nb_men_init);
+    print ("nb_men        :", nb_men);
+    print ("nb_women_init :", nb_women_init);
+    print ("nb_women      :", nb_women);
+    print ("deb           :", deb);
+    print ("fin           :", fin);
+    print ("delay_death_m :", delay_death_m);
+    print ("delay_death_w :", delay_death_w);
+    
 # generation de la liste des dates de la periode d'etude
 l_date = pd.date_range(param['begin_dte'], param['end_dte']).tolist()
 
@@ -311,8 +329,6 @@ df_com = df_com.reset_index(drop=True)
 
 l_depcom    = df_com["DEPCOM"]
 l_comweight = df_com["weight"]
-
-
 
 # constitution du dataframe finess  correspondant a l'evenement init
 # tirage au sort de l'etablissement de realisation du soin
@@ -341,9 +357,6 @@ df_finess = df_finess.reset_index(drop=True)
 
 l_finess    = df_finess["FI"]
 l_finessweight = df_finess["weight"]
-
-
-
 
 # liste 0/1 (pct de patient malades) par evt pour les patients "init"
 # permet de maitriser le nb exact d'evt et donc respecter les parametres  
@@ -374,23 +387,25 @@ idxPatToRemove = [0]*len(l_event);
 #print(datetime.datetime.now())
 
 l_men_init=[]
-if nb_men_init>0:
+
+if nb_men_init > 0:
+
     y_n_death = [0]*(nb_men_init-int(l_init['pct_death_m']*nb_men_init)) + [1]*int(l_init['pct_death_m']*nb_men_init)
     random.shuffle(y_n_death)
     idx_y_n_death=0
     [age_mean, age_sd, ref_year] = [l_init['age_mean_m'],l_init['age_sd_m'],param['ref_year']];
     tnorm = truncnorm ((18 - age_mean) / age_sd, (90 - age_mean) / age_sd, loc=age_mean, scale=age_sd);
-
-for i in range(nb_men_init):
-    new_pat_init=gen_new_pat_init(i+1,1, age_mean, age_sd, ref_year, delay_death_m, tnorm,idx_y_n_death)
-
-    for e,evt in enumerate(new_pat_init):
-        l_men_init.append(new_pat_init[e])
-       
-    #del y_n_death[0]
-    idx_y_n_death=idx_y_n_death+1
     
-    printProgressBar(i, nb_men_init-1, prefix="men   (ill)", length=50)
+    for i in range(nb_men_init):
+        new_pat_init=gen_new_pat_init(i+1,1, age_mean, age_sd, ref_year, delay_death_m, tnorm,idx_y_n_death)
+    
+        for e,evt in enumerate(new_pat_init):
+            l_men_init.append(new_pat_init[e])
+           
+        #del y_n_death[0]
+        idx_y_n_death=idx_y_n_death+1
+        
+        printProgressBar(i, nb_men_init-1, prefix="men   (ill)", length=50)
 
 ##############################################################
 # generation de la population des femmes malades 

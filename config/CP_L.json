@@ -25,7 +25,7 @@
     "init" : 
     {
         "mark" : "",
-		"center" : ""
+		"center" : "",
         "age_mean_m"  : 0,
         "age_sd_m"    : 0,
         "age_mean_w"  : 0,
