@@ -538,6 +538,7 @@ df_healthy     = df_healthy.drop(l_init["mark"] ,axis=1)
 df_healthy["death_ts"] = (pd.to_datetime(df_healthy["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
+df_healthy = df_healthy [ df_init.columns.tolist()]
 
 # export de la population dans un fichier csv
 df_init.to_csv(param["dir_file"]+'file_init.csv',index=False,sep=';')
