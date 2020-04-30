@@ -2,7 +2,7 @@
     "parameters" :
     {
         "pop"         : 300000, 
-        "pct_ill"     : 1,
+        "pct_ill"     : 0,
         "first_num_pat" : 300000,        
         "begin_dte"   : "2008-01-01",
         "end_dte"     : "2014-12-31",
