@@ -532,6 +532,9 @@ df_init["death_ts"] = (pd.to_datetime(df_init["death_dte"], format="%Y-%m-%d")-t
 df_init["mark_ts"]  = (pd.to_datetime(df_init["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_init["birth_ts"] = (pd.to_datetime(df_init["yob"].map(str)+df_init["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
 
+col_csv    = ['num_pat', 'sex','yob','mob','com','death','death_dte', 'mark','mark_dte','finess','death_ts','mark_ts','birth_ts']  
+df_init = df_init[ col_csv]
+
 
 l_initpat=df_pat_init['num_pat'].values.tolist()
 # nb erreurs calcule selon le nb d'evt
@@ -554,6 +557,8 @@ df_healthy     = df_healthy.drop(l_init["mark"] ,axis=1)
 df_healthy["death_ts"] = (pd.to_datetime(df_healthy["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
+df_healthy = df_healthy[col_csv]
+
 #df_healthy = df_healthy [ df_init.columns.tolist()]
 # export de la population dans un fichier csv
 df_init.to_csv(param["dir_file"]+'file_init.csv',index=False,sep=';')
