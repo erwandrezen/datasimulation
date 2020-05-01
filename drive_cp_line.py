@@ -557,6 +557,16 @@ df_healthy     = df_healthy.drop(l_init["mark"] ,axis=1)
 df_healthy["death_ts"] = (pd.to_datetime(df_healthy["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
+
+if len(df_healthy)==0:
+    df_pat_healthy['mark']=None
+    df_pat_healthy['mark_dte']=None
+    df_pat_healthy['finess']=None
+    df_pat_healthy['death_ts']=(pd.to_datetime(df_pat_healthy["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
+    df_pat_healthy['mark_ts']=None
+    df_pat_healthy['birth_ts']=(pd.to_datetime(df_pat_healthy["yob"].map(str)+df_pat_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
+    df_healthy=df_pat_healthy
+
 df_healthy = df_healthy[col_csv]
 
 #df_healthy = df_healthy [ df_init.columns.tolist()]
