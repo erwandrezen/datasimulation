@@ -83,9 +83,25 @@ def gen_com():
     return com
 
 ################################################################################
-def gen_finess():
+def gen_finess(dep):
     # attribution aleatoire ponderee (cf. sae 2016 (weight)) du finess du centre
     # d'examen de l'evt init
+    if l_init['center'] =='SARCOME' or l_init['center'] =='CANCER':
+        # pas de centre sarcome pour corse
+        if dep in ['02A','02B'] and l_init['center'] in ['SARCOME']:
+            dep='013'
+        reg=df_sae[df_sae['dep']==dep]["reg"].unique()
+        reg=reg[0]
+        df_finess_com=df_sae[df_sae['reg']==reg]
+        df_finess_com = df_finess_com.reset_index(drop=True)        
+        l_finess    = df_finess_com["FI"]
+        l_finessweight = df_finess_com["weight"]
+
+        
+    else:
+        l_finess    = df_sae["FI"]
+        l_finessweight = df_sae["weight"]
+
     finess = random.choices(l_finess,l_finessweight)[0]
     
     return finess
@@ -138,7 +154,8 @@ def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,id
     # tirage au sort de la date de l'event initial
     init_dte = random.choice(l_date)
     # finess 
-    finess=gen_finess() 
+    dep=com[0:3]
+    finess=gen_finess(dep) 
     # Date de deces oui/non
     death=y_n_death[idx_y_n_death]
     # tirage au sort de la date de dc
@@ -337,30 +354,29 @@ l_comweight = df_com["weight"]
 # constitution du dataframe finess  correspondant a l'evenement init
 # tirage au sort de l'etablissement de realisation du soin
 if l_init['center']=='AVC':
-    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight_fr']
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight_fr','weight_k_reg','weight_s_reg']
     df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';', header=0, names=header_row)
     df_finess=df_sae[df_sae['avc']==1]
 
 elif l_init['center']=='SARCOME':
-    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight','weight_cancer','weight_dep','weight_reg','weight_fr']
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight_fr','weight_k_reg','weight']
     df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
     df_finess=df_sae[df_sae['sarcome']==1]
 
 elif l_init['center']=='CANCER':
-    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight','weight_dep','weight_reg','weight_fr']
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight_fr','weight','weight_s_reg']
     df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
     df_finess=df_sae[df_sae['cancer']==1]
 
 else:
-    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight']
+    header_row = ['FI','fi_lib','dep','reg','MCO','CANCERO','UNV','avc','sarcome','cancer','weight_avc','weight_sarcome','weight_cancer','weight_dep','weight_reg','weight','weight_k_reg','weight_s_reg']
     df_sae=pd.read_csv(filepath_or_buffer='data_ref/sae_2016.csv',sep=';',header=0, names=header_row)
     df_finess=df_sae
 
 
 df_finess = df_finess.reset_index(drop=True)
 
-l_finess    = df_finess["FI"]
-l_finessweight = df_finess["weight"]
+
 
 # liste 0/1 (pct de patient malades) par evt pour les patients "init"
 # permet de maitriser le nb exact d'evt et donc respecter les parametres  
@@ -509,7 +525,7 @@ df_pat_init = df_pat_init.drop_duplicates()
 
 df_evt_init = df_init.dropna(subset=['mark_dte'])
 df_evt_init = df_evt_init.drop(['sex','yob','mob','com',l_init["mark"],'death','death_dte'] ,axis=1)
-df_init     = pd.merge(df_pat_init,df_evt_init,on='num_pat',how='left')
+df_init     = pd.merge(df_pat_init,df_evt_init,on='num_pat',how='inner')
 df_init     = df_init.drop(l_init["mark"] ,axis=1)    
 
 df_init["death_ts"] = (pd.to_datetime(df_init["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
@@ -532,14 +548,13 @@ df_pat_healthy = df_pat_healthy.drop_duplicates()
 
 df_evt_healthy = df_healthy.dropna(subset=['mark_dte'])
 df_evt_healthy = df_evt_healthy.drop(['sex','yob','mob','com',l_init["mark"],'death','death_dte'] ,axis=1)
-df_healthy     = pd.merge(df_pat_healthy,df_evt_healthy,on='num_pat',how='left')
+df_healthy     = pd.merge(df_pat_healthy,df_evt_healthy,on='num_pat',how='inner')
 df_healthy     = df_healthy.drop(l_init["mark"] ,axis=1)    
 
 df_healthy["death_ts"] = (pd.to_datetime(df_healthy["death_dte"], format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["mark_ts"]  = (pd.to_datetime(df_healthy["mark_dte"],  format="%Y-%m-%d")-timeorigin).dt.days
 df_healthy["birth_ts"] = (pd.to_datetime(df_healthy["yob"].map(str)+df_healthy["mob"].map(str)+'01', format="%Y%m%d")-timeorigin).dt.days
-df_healthy = df_healthy [ df_init.columns.tolist()]
-
+#df_healthy = df_healthy [ df_init.columns.tolist()]
 # export de la population dans un fichier csv
 df_init.to_csv(param["dir_file"]+'file_init.csv',index=False,sep=';')
 df_init80.to_csv(param["dir_file"]+'file_init80.csv',index=False,sep=';')
