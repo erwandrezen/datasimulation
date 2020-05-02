@@ -38,47 +38,6 @@
 
     "events" : 
     [
-        {
-            "mark" : "cancer",
-            "occ" : -1,
-            "pct_occ" : 0.17,
-            "delay_mean" : 365,
-            "delay_sd" : 300,
-            "nb_occ" : 1,
-            "nb_occ_max" : 3,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "diab",
-            "occ" : -1,
-            "pct_occ" : 0.1,
-            "delay_mean" : 365,
-            "delay_sd" : 300,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        },
-        
-        {
-            "mark" : "hta",
-            "occ" : 1,
-            "pct_occ" : 0.51,
-            "delay_mean" : 365,
-            "delay_sd" : 300,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "coro",
-            "occ" : -1,
-            "pct_occ" : 0.08,
-            "delay_mean" : 365,
-            "delay_sd" : 300,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        }        
     ]
 
 }

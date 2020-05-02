@@ -16,7 +16,7 @@
         "age_sd_w"    : 0,
         "pct_death_m_pop" : 0,
         "pct_death_w_pop" : 0,
-        "dir_file" : "F:/PEPS/Simulated Data/files/sarcome/registre",
+        "dir_file" : "G:/PEPS/Simulated Data/files/sarcome/registre",
         "file_all" : "file_all",
         "file_healthy" : "file_healthy",
         "file_ill" : "file_ill",
@@ -38,66 +38,6 @@
 
     "events" : 
     [
-        {
-            "mark" : "chimio",
-            "occ" : -1,
-            "pct_occ" : 0.3,
-            "delay_mean" : 180,
-            "delay_sd" : 160,
-            "nb_occ" : 1,
-            "nb_occ_max" : 6,
-            "pct_occ_pop" : 0
-        },	
-        {
-            "mark" : "chimio",
-            "occ" : 1,
-            "pct_occ" : 0.3,
-            "delay_mean" : 365,
-            "delay_sd" : 300,
-            "nb_occ" : 3,
-            "nb_occ_max" : 6,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "irm",
-            "occ" : 1,
-            "pct_occ" : 1,
-            "delay_mean" : 365,
-            "delay_sd" : 350,
-            "nb_occ" : 6,
-            "nb_occ_max" : 8,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "diab",
-            "occ" : -1,
-            "pct_occ" : 0.06,
-            "delay_mean" : 365,
-            "delay_sd" : 350,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "hta",
-            "occ" : -1,
-            "pct_occ" : 0.6,
-            "delay_mean" : 365,
-            "delay_sd" : 350,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        },
-        {
-            "mark" : "coro",
-            "occ" : -1,
-            "pct_occ" : 0.002,
-            "delay_mean" : 365,
-            "delay_sd" : 350,
-            "nb_occ" : 1,
-            "nb_occ_max" : 1,
-            "pct_occ_pop" : 0
-        }
     ]
 
 }
