@@ -77,15 +77,6 @@ def gen_mob (mois_init):
 
 
 ################################################################################
-def gen_mob ():
-     # attribution aleatoire du mois de naissance
-    l_month = ['01','02','03','04','05','06','07','08','09','10','11','12']
-    m       = random.randint(0, len(l_month) - 1)  
-    mob     = l_month[m]  
-    
-    return mob
-
-################################################################################
 def gen_com():
     # attribution aleatoire ponderee (cf. recensement (weight)) de la commune de residence
     # selon le niveau geo
