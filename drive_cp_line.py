@@ -53,6 +53,17 @@ def getRandomDate(begin,end):
 # fonctions
 #################################################################################
 
+def gen_yob (ref_year, tnorm):
+    
+    # attribution aleatoire de l'annee de naissance selon la fourchette des parametres
+    # yob=ref_year-(random.randint(age_mean-age_sd,age_mean+age_sd))
+    # yob=ref_year-int((random.gauss(age_mean, age_sd)))
+
+    year = tnorm.rvs()
+    yob  = ref_year - int(year)
+    
+    return yob
+
 def gen_mob (mois_init):
     l_month=[]
     for i in range (mois_init,13):
