@@ -53,16 +53,17 @@ def getRandomDate(begin,end):
 # fonctions
 #################################################################################
 
-def gen_yob (ref_year, tnorm):
+def gen_mob (mois_init):
+    l_month=[]
+    for i in range (mois_init,13):
+        l_month.append("{:0>2d}".format(i))
+   # attribution aleatoire du mois de naissance
+   # l_month = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    m       = random.randint(0, len(l_month) - 1)  
+    mob     = l_month[m]  
     
-    # attribution aleatoire de l'annee de naissance selon la fourchette des parametres
-    # yob=ref_year-(random.randint(age_mean-age_sd,age_mean+age_sd))
-    # yob=ref_year-int((random.gauss(age_mean, age_sd)))
+    return mob
 
-    year = tnorm.rvs()
-    yob  = ref_year - int(year)
-    
-    return yob
 
 ################################################################################
 def gen_mob ():
@@ -145,14 +146,18 @@ def gen_events_lin (yn_occ,mark,end_dte):
 # generation d'un nouveau patient malade
 def gen_new_pat_init (num_pat,sex,age_mean,age_sd,ref_year,delay_death, tnorm,idx_y_n_death):
     
-    # tirage au sort l'annee de naissance
-    yob=gen_yob(ref_year,tnorm)
-    # tirage au sort du mois de naissance
-    mob=gen_mob()
     # tirage au sort de la commune
     com=gen_com()    
     # tirage au sort de la date de l'event initial
     init_dte = random.choice(l_date)
+    year_init=init_dte.year
+    mois_init=init_dte.month
+
+    # tirage au sort l'annee de naissance
+    yob=gen_yob(year_init,tnorm)
+    # tirage au sort du mois de naissance
+    mob=gen_mob(mois_init)
+
     # finess 
     dep=com[0:3]
     finess=gen_finess(dep) 
@@ -201,7 +206,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm,idx_y_n_death):
     yob = gen_yob(ref_year, tnorm)      
 
     # tirage au sort du mois de naissance
-    mob = gen_mob()
+    mob = gen_mob(6)
 
     # tirage au sort de la commune
     com = gen_com()      
