@@ -206,7 +206,7 @@ def gen_new_pat (num_pat,sex,age_mean,age_sd,ref_year, tnorm,idx_y_n_death):
     yob = gen_yob(ref_year, tnorm)      
 
     # tirage au sort du mois de naissance
-    mob = gen_mob(6)
+    mob = gen_mob(1)
 
     # tirage au sort de la commune
     com = gen_com()      
