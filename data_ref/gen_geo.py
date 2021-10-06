@@ -19,10 +19,10 @@ header_com2=['codgeo','dep','reg','ptot']
 
 dtype_com={'codgeo': str}
 
-pop1=pd.read_csv(filepath_or_buffer='F:/PEPS/Nomenclatures/GEO/BTT_TD_POP1B_2016/BTT_TD_POP1B_2016.csv',sep=';', dtype=dtype_com, header=0, names=header_row,usecols=header_x)
-com=pd.read_csv(filepath_or_buffer='F:/PEPS/Données simulées/data_ref/communes_fr.csv',sep=';', dtype=dtype_com, header=0, names=header_com,usecols=header_com2)
-dep=pd.read_csv(filepath_or_buffer='F:/PEPS/Données simulées/data_ref/dep.csv',sep=';')
-ref=pd.read_csv(filepath_or_buffer='F:/PEPS/Données simulées/data_ref/reg.csv',sep=';')
+pop1=pd.read_csv(filepath_or_buffer='F:/work/Nomenclatures/GEO/BTT_TD_POP1B_2016/BTT_TD_POP1B_2016.csv',sep=';', dtype=dtype_com, header=0, names=header_row,usecols=header_x)
+com=pd.read_csv(filepath_or_buffer='F:/work/Données simulées/data_ref/communes_fr.csv',sep=';', dtype=dtype_com, header=0, names=header_com,usecols=header_com2)
+dep=pd.read_csv(filepath_or_buffer='F:/work/Données simulées/data_ref/dep.csv',sep=';')
+ref=pd.read_csv(filepath_or_buffer='F:/work/Données simulées/data_ref/reg.csv',sep=';')
 
 
 
@@ -72,7 +72,7 @@ nb_men=df_men_age1["nb_int"].sum()
 df_men['weight_fr']=df_men['nb_int']/nb_men*1000000
 df_men['weight_fr']=df_men['weight_fr'].fillna(0.0).astype(int)
 
-df_men.to_csv('F:/PEPS/Données simulées/data_ref/geo_men.csv',index=False,columns= ['codgeo','dep','reg','weight_dep','weight_reg','weight_fr'])
+df_men.to_csv('F:/work/Données simulées/data_ref/geo_men.csv',index=False,columns= ['codgeo','dep','reg','weight_dep','weight_reg','weight_fr'])
 
 
 
@@ -94,10 +94,10 @@ df_age_m_reg['weight_reg']=df_age_m_reg['weight_reg'].fillna(0.0).astype(int)
 df_age_m_fr['weight_fr']=df_age_m_fr['nb_int']/nb_men*1000+1
 df_age_m_fr['weight_fr']=df_age_m_fr['weight_fr'].fillna(0.0).astype(int)
 
-df_age_m.to_csv('F:/PEPS/Données simulées/data_ref/age_men.csv',index=False,columns= ['age','dep','reg','weight_dep','weight_reg'])
-df_age_m_reg.to_csv('F:/PEPS/Données simulées/data_ref/age_men_reg.csv',index=False,columns= ['age','reg','weight_reg'])
+df_age_m.to_csv('F:/work/Données simulées/data_ref/age_men.csv',index=False,columns= ['age','dep','reg','weight_dep','weight_reg'])
+df_age_m_reg.to_csv('F:/work/Données simulées/data_ref/age_men_reg.csv',index=False,columns= ['age','reg','weight_reg'])
 
-df_age_m_fr.to_csv('F:/PEPS/Données simulées/data_ref/age_men_fr.csv',index=False,columns= ['age','weight_fr'])
+df_age_m_fr.to_csv('F:/work/Données simulées/data_ref/age_men_fr.csv',index=False,columns= ['age','weight_fr'])
 
 
 # calcul de la proportion de la pop men par age et par dep, reg ou fr
@@ -115,7 +115,7 @@ nb_men=df_men_age["nb_int"].sum()
 df_men_age['weight_fr']=df_men_age['nb_int']/nb_men*1000000
 df_men_age['weight_fr']=df_men_age['weight_fr'].fillna(0.0).astype(int)
 
-df_men_age.to_csv('F:/PEPS/Données simulées/data_ref/geo_men_age.csv',index=False,columns= ['codgeo','age','dep','reg','weight_dep','weight_reg','weight_fr'])
+df_men_age.to_csv('F:/work/Données simulées/data_ref/geo_men_age.csv',index=False,columns= ['codgeo','age','dep','reg','weight_dep','weight_reg','weight_fr'])
 
 
 
@@ -155,7 +155,7 @@ nb_women=df_women_age1["nb_int"].sum()
 df_women['weight_fr']=df_women['nb_int']/nb_women*1000000
 df_women['weight_fr']=df_women['weight_fr'].fillna(0.0).astype(int)
 
-df_women.to_csv('F:/PEPS/Données simulées/data_ref/geo_women.csv',index=False,columns= ['codgeo','dep','reg','weight_dep','weight_reg','weight_fr'])
+df_women.to_csv('F:/work/Données simulées/data_ref/geo_women.csv',index=False,columns= ['codgeo','dep','reg','weight_dep','weight_reg','weight_fr'])
 
 
 
@@ -178,9 +178,9 @@ df_age_w_reg['weight_reg']=df_age_w['weight_reg'].fillna(0.0).astype(int)
 df_age_w_fr['weight_fr']=df_age_w_fr['nb_int']/nb_women*1000+1
 df_age_w_fr['weight_fr']=df_age_w_fr['weight_fr'].fillna(0.0).astype(int)
 
-df_age_w.to_csv('F:/PEPS/Données simulées/data_ref/age_women.csv',index=False,columns= ['age','dep','reg','weight_dep','weight_reg'])
-df_age_w_reg.to_csv('F:/PEPS/Données simulées/data_ref/age_women_reg.csv',index=False,columns= ['age','reg','weight_reg'])
-df_age_w_fr.to_csv('F:/PEPS/Données simulées/data_ref/age_women_fr.csv',index=False,columns= ['age','weight_fr'])
+df_age_w.to_csv('F:/work/Données simulées/data_ref/age_women.csv',index=False,columns= ['age','dep','reg','weight_dep','weight_reg'])
+df_age_w_reg.to_csv('F:/work/Données simulées/data_ref/age_women_reg.csv',index=False,columns= ['age','reg','weight_reg'])
+df_age_w_fr.to_csv('F:/work/Données simulées/data_ref/age_women_fr.csv',index=False,columns= ['age','weight_fr'])
 
 
 # calcul de la proportion de la pop women par age et par dep, reg ou fr
@@ -198,4 +198,4 @@ nb_women=df_women_age["nb_int"].sum()
 df_women_age['weight_fr']=df_women_age['nb_int']/nb_women*1000000
 df_women_age['weight_fr']=df_women_age['weight_fr'].fillna(0.0).astype(int)
 
-df_women_age.to_csv('F:/PEPS/Données simulées/data_ref/geo_women_age.csv',index=False,columns= ['codgeo','age','dep','reg','weight_dep','weight_reg','weight_fr'])
+df_women_age.to_csv('F:/work/Données simulées/data_ref/geo_women_age.csv',index=False,columns= ['codgeo','age','dep','reg','weight_dep','weight_reg','weight_fr'])

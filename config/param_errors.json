@@ -3,8 +3,8 @@
     {
         "pct_err"     : 0.1,
         "init" : "AVC",
-        "init_file" : "F:/PEPS/Simulated Data/files/file_init.csv",
-        "rep_err" : "F:/PEPS/Simulated Data/files/errors/"
+        "init_file" : "F:/work/Simulated Data/files/file_init.csv",
+        "rep_err" : "F:/work/Simulated Data/files/errors/"
     },
 
     "scenarios" : 

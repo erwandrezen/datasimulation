@@ -16,7 +16,7 @@
         "age_sd_w"    : 23,
         "pct_death_m_pop" : 0.06,
         "pct_death_w_pop" : 0.05,
-        "dir_file" : "F:/PEPS/Simulated Data/files/avc/general",
+        "dir_file" : "F:/work/Simulated Data/files/avc/general",
         "file_all" : "file_all",
         "file_healthy" : "file_healthy",
         "file_ill" : "file_ill",

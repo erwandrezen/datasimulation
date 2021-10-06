@@ -16,7 +16,7 @@
         "age_sd_w"    : 0,
         "pct_death_m_pop" : 0,
         "pct_death_w_pop" : 0,
-        "dir_file" : "G:/PEPS/Simulated Data/files/sarcome/trial",
+        "dir_file" : "G:/work/Simulated Data/files/sarcome/trial",
         "file_all" : "file_all",
         "file_healthy" : "file_healthy",
         "file_ill" : "file_ill",
