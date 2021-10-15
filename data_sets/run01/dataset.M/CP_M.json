@@ -1,0 +1,43 @@
+{
+    "parameters" :
+    {
+        "pop"         : 10000, 
+        "pct_ill"     : 1,
+        "first_num_pat" : 10000,        
+        "begin_dte"   : "2009-01-01",
+        "end_dte"     : "2013-12-31",
+        "ref_year"    : 2012,
+        "pct_men"     : 0.64,
+        "geo_level"   : "dep",
+        "geo_sel"     : "029",
+        "age_mean_m"  : 0,
+        "age_sd_m"    : 0,
+        "age_mean_w"  : 0,
+        "age_sd_w"    : 0,
+        "pct_death_m_pop" : 0,
+        "pct_death_w_pop" : 0,
+        "file_all" : "file_all",
+        "file_healthy" : "file_healthy",
+        "file_ill" : "file_ill",
+        "traces" : 1,
+        "seed" : 0
+    },
+    "init" : 
+    {
+        "mark" : "AVC",
+		"center" : "AVC",
+        "age_mean_m"  : 71,
+        "age_sd_m"    : 14,
+        "age_mean_w"  : 79,
+        "age_sd_w"    : 13,
+        "pct_death_m" : 0.53,
+        "delay_death_m" : 2,
+        "pct_death_w" : 0.65,
+        "delay_death_w" : 3
+    },
+
+    "events" : 
+    [
+    ]
+
+}

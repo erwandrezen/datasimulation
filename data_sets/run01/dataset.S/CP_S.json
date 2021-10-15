@@ -1,0 +1,43 @@
+{
+    "parameters" :
+    {
+        "pop"         : 1000, 
+        "pct_ill"     : 1,
+        "first_num_pat" : 5000,        
+        "begin_dte"   : "2011-01-01",
+        "end_dte"     : "2013-12-31",
+        "ref_year"    : 2012,
+        "pct_men"     : 0.19,
+        "geo_level"   : "fr",
+        "geo_sel"     : "",
+        "age_mean_m"  : 0,
+        "age_sd_m"    : 0,
+        "age_mean_w"  : 0,
+        "age_sd_w"    : 0,
+        "pct_death_m_pop" : 0,
+        "pct_death_w_pop" : 0,
+        "file_all" : "file_all",
+        "file_healthy" : "file_healthy",
+        "file_ill" : "file_ill",
+        "traces" : 1,
+        "seed" : 0
+    },
+    "init" : 
+    {
+        "mark" : "CHIR",
+        "center" : "SARCOME" ,
+        "age_mean_m"  : 57,
+        "age_sd_m"    : 13,
+        "age_mean_w"  : 57,
+        "age_sd_w"    : 13,
+        "pct_death_m" : 0.8,
+        "delay_death_m" : 2,
+        "pct_death_w" : 0.8,
+        "delay_death_w" : 2
+    },
+
+    "events" : 
+    [
+    ]
+
+}
